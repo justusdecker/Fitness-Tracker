@@ -12,3 +12,7 @@ class Item(Base):
     description_path = Column(String)
     jitle = Column(String)
     emoji = Column(String)
+    
+    @staticmethod
+    def getVarTable():
+        return ...
