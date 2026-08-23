@@ -24,13 +24,15 @@ class DAH:
     """
     Data Access Handler
     """
-    def createItem():
-        data = Item(**vars)
-        session.add(data)
+    def createItem(**data):
+        obj = Item(**data)
+        session.add(obj)
         session.commit()
-        
-    def readItem(id : int): 
-        session.query(Item).all()
+    
+    
+    
+    def readItems(): 
+        return session.query(Item).all()
         
     def updateItem(id: int, **data): 
         obj = DAH.readItem(id)
