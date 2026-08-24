@@ -2,8 +2,23 @@
     {% for item in items %}
     <div class="item">
         <h3>{{item.title}}</h3>
+
+        <img src="{{item.img}}" alt="">
         <p>{{item.id}}</p>
-        
+        <div>
+            <table>
+                <tr>
+                    <th>key</th>
+                    <th>value</th>
+                </tr>
+                {% for key in Item.getVarTableCropped() %}
+                <tr>
+                    <td>{{key}}</td>
+                    <td>{{item.__getattribute__(key)}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
     </div>
     {% endfor %}
 </div>
