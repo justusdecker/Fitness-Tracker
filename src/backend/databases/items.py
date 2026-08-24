@@ -7,8 +7,10 @@ class Item(Base):
     """
     __tablename__ = 'item'
     id = Column(Integer, primary_key=True)
-    title = Column(String)
+    
+    title = Column(String, nullable= False)
     description = Column(String)
+    img = Column(String)
     
     calorific_value = Column(Numeric)
     fat = Column(Numeric)
@@ -32,10 +34,47 @@ class Item(Base):
     creatine = Column(Numeric)
     magnesium = Column(Numeric)
     n_acetyl_l_tyrosin = Column(Numeric)
+    l_arginin = Column(Numeric)
+    l_citrullin = Column(Numeric)
     caffeine = Column(Numeric)
     
     nutri_score = Column(Integer)
     
     @staticmethod
     def getVarTable():
-        return ...
+        return [
+            'title',
+            'description',
+            'img',
+            'calorific_value',
+            'fat',
+            'saturated_fatty_acids',
+            'carbohydrates',
+            'protein',
+            'salt',
+            'vitamine_D',
+            'vitamine_C',
+            'vitamine_B1',
+            'vitamine_B2',
+            'vitamine_B3',
+            'vitamine_B5',
+            'vitamine_B6',
+            'vitamine_B7',
+            'vitamine_B9',
+            'vitamine_B12',
+            'beta_alanine',
+            'creatine',
+            'magnesium',
+            'n_acetyl_l_tyrosin',
+            'l_arginin',
+            'l_citrullin',
+            'caffeine',
+            'nutri_score'
+        ]
+    @staticmethod
+    def getVarTableCropped():
+        t = Item.getVarTable()
+        t.remove('img')
+        t.remove('title')
+        t.remove('description')
+        return t
