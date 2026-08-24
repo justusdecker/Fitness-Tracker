@@ -6,12 +6,13 @@ body {
 }
 
 .all-items {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
 
 .item {
+  height: 600px;
   background: #347363;
   color: white;
   border-radius: 10px;
@@ -27,4 +28,11 @@ body {
 
 .item h3, .item p {
   text-align: center;
+}
+.item img {
+  width: 180px;
+  height: 180px;
+  background: white;
+  overflow: hidden;
+  transform: translateZ(20px);
 }
