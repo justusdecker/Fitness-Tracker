@@ -1,3 +1,4 @@
+from typing import List
 from src.backend.databases.common.constants import *
 from src.backend.databases.items import Item
 class SQLAccess:
@@ -31,7 +32,7 @@ class DAH:
     
     
     
-    def readItems(): 
+    def readItems() -> List[Item]: 
         return session.query(Item).all()
         
     def updateItem(id: int, **data): 
