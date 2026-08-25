@@ -10,6 +10,7 @@ class Item(Base):
     
     title = Column(String, nullable= False)
     description = Column(String)
+    ingredients = Column(String)
     img = Column(String)
     
     calorific_value = Column(Numeric)
@@ -40,6 +41,8 @@ class Item(Base):
     
     nutri_score = Column(Integer)
     
+    
+    
     @staticmethod
     def getVarTable():
         return [
@@ -69,7 +72,8 @@ class Item(Base):
             'l_arginin',
             'l_citrullin',
             'caffeine',
-            'nutri_score'
+            'nutri_score',
+            'ingredients'
         ]
     @staticmethod
     def getVarTableCropped():
@@ -77,4 +81,5 @@ class Item(Base):
         t.remove('img')
         t.remove('title')
         t.remove('description')
+        t.remove('ingredients')
         return t
