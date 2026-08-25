@@ -1,3 +1,4 @@
+PROJECT_TITLE = 'Fitness Tracker'
 GET, POST, DELETE = 'GET', 'POST', 'DELETE'
 HTTP_STATUS_MESSAGES = {
     # 1xx: Informational
