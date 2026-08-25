@@ -1,0 +1,9 @@
+<h2>Create a new Item</h2>
+<div class="all-items">
+{% for key in Item.getVarTable() %}
+<div class="item">
+    <input type="text" class="inp" placeholder="{{key}}" id="{{key}}">
+</div>
+{% endfor %}
+<div class="crt-btn">Create</div>
+</div>
