@@ -1,4 +1,6 @@
-from src.common.build_flask import *
+import flet as ft
+from src.common.constants import PROJECT_TITLE
+
 from src.backend.databases.data_access import DAH, Item
 for i in range(5):
     DAH.createItem(
@@ -7,17 +9,40 @@ for i in range(5):
             'img': 'https://www.vitaminexpress.org/_next/image?url=https%3A%2F%2Fimages.cdn.europe-west1.gcp.commercetools.com%2F783def08-dd2b-475d-b671-c397c0c2dbd7%2F6958-04-L-Arginin_70-SjmjxvAb.png&w=1440&q=80'
         }
     )
-def err_return(code: int = 404):
-    """
-    Returns a simple template for debugging purposes.
-    """
-    return render_template('error.html', err=code, msg=HTTP_STATUS_MESSAGES[code]), code
+    
+def main(page: ft.Page):
+    page.title = PROJECT_TITLE
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    textfields = []
+    for item in DAH.readItems():
+        obj = ft.Container(
+            ft.Column(
+                controls=[
+                ft.Text(item.title),
+                ft.Image(
+                    src=item.img,
+                    width=200,
+                    height=150,
+                    fit="cover",
+                    border_radius=ft.BorderRadius.all(8),
+                )
+                ]
+            ),
+            bgcolor=ft.Colors.WHITE_10
+        )
+        textfields.append(obj)
+    
+    
+    page.add(
+        ft.Container(
+            content=ft.ListView(
+                    controls=textfields,
+                    spacing=10,
+                    padding=10,),
+            bgcolor=ft.Colors.BLUE_GREY_500,  
+            border_radius=ft.BorderRadius.all(5),
+            expand=True
+        )
+        )
 
-@app.route('/',methods = [GET])
-def index():
-    return render_template('default.html', items = DAH.readItems(), Item = Item)
-@app.route('/create',methods = [GET])
-def create():
-    return render_template('create.html', Item = Item)
-if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=5000,debug=True)
+ft.run(main)
