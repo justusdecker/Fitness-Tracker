@@ -14,8 +14,11 @@ for i in range(5):
 
 def main(page: ft.Page):
     page.title = PROJECT_TITLE
+    page.window.width = 720
+    page.window.height = 1280
+    
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    IUI = ItemsUI()
+    IUI = ItemsUI(page)
     SUI = SettingsUI()
     BUI = Body()
     def on_nav_change(e):
@@ -30,7 +33,7 @@ def main(page: ft.Page):
     main_container = ft.Container(
         content=BUI.get(),
         expand=True,
-        bgcolor=ft.Colors.AMBER,
+        bgcolor=ft.Colors.BLUE_900,
         border_radius=ft.BorderRadius.all(5),
     )
     page.add(main_container)
