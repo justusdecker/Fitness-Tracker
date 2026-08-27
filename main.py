@@ -5,6 +5,7 @@ from src.ui.items import Items as ItemsUI
 from src.ui.settings import Settings as SettingsUI
 from src.ui.create import CreateItemUI
 from src.ui.body import Body
+"""
 for i in range(5):
     DAH.createItem(
         **{
@@ -12,6 +13,7 @@ for i in range(5):
             'img': 'https://www.vitaminexpress.org/_next/image?url=https%3A%2F%2Fimages.cdn.europe-west1.gcp.commercetools.com%2F783def08-dd2b-475d-b671-c397c0c2dbd7%2F6958-04-L-Arginin_70-SjmjxvAb.png&w=1440&q=80'
         }
     )
+"""
 
 
 
@@ -27,7 +29,7 @@ def main(page: ft.Page):
         main_container.content = CIUI.get()
         page.update()
     IUI = ItemsUI(page, window2createitem)
-    CIUI = CreateItemUI(window2readitem)
+    CIUI = CreateItemUI(window2readitem, IUI)
     SUI = SettingsUI()
     BUI = Body()
     
