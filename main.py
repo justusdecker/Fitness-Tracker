@@ -1,8 +1,9 @@
 import flet as ft
 from src.common.constants import PROJECT_TITLE
-from src.backend.databases.data_access import DAH, Item
+from src.databases.data_access import DAH, Item
 from src.ui.items import Items as ItemsUI
 from src.ui.settings import Settings as SettingsUI
+from src.ui.create import CreateItemUI
 from src.ui.body import Body
 for i in range(5):
     DAH.createItem(
@@ -12,25 +13,37 @@ for i in range(5):
         }
     )
 
+
+
 def main(page: ft.Page):
     page.title = PROJECT_TITLE
+
+    
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    IUI = ItemsUI()
+    def window2readitem():
+        main_container.content = IUI.get()
+        page.update()
+    def window2createitem():
+        main_container.content = CIUI.get()
+        page.update()
+    IUI = ItemsUI(page, window2createitem)
+    CIUI = CreateItemUI(window2readitem)
     SUI = SettingsUI()
     BUI = Body()
+    
     def on_nav_change(e):
         index = e.control.selected_index
         if index == 0:
             main_container.content = BUI.get()
         elif index == 1:
-            main_container.content = IUI.get()
+            window2readitem()
         elif index == 2:
             main_container.content = SUI.get()
         page.update()  # UI aktualisieren
     main_container = ft.Container(
         content=BUI.get(),
         expand=True,
-        bgcolor=ft.Colors.AMBER,
+        bgcolor=ft.Colors.BLUE_900,
         border_radius=ft.BorderRadius.all(5),
     )
     page.add(main_container)

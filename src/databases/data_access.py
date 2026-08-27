@@ -1,6 +1,6 @@
 from typing import List
-from src.backend.databases.common.constants import *
-from src.backend.databases.items import Item
+from src.databases.common.constants import *
+from src.databases.items import Item
 class SQLAccess:
     @staticmethod
     def close_and_dispose(s=None,e=None):
