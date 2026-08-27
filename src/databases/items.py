@@ -1,4 +1,4 @@
-from src.backend.databases.common.constants import ( Base, Column, String, Integer, Numeric )
+from src.databases.common.constants import ( Base, Column, String, Integer, Numeric )
 class Item(Base):
     """
     Item-Table
