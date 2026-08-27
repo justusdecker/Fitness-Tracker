@@ -1,17 +1,14 @@
 from src.ui.ui import UI
 import flet as ft
-from src.backend.databases.data_access import DAH, Item
+from src.databases.data_access import DAH, Item
 class Items(UI):
-    def __init__(self, page):
+    def __init__(self, page, page_switch):
         super().__init__()
         self.textfields = []
         
         for item in DAH.readItems():
-            exp_btn = ft.Button(
-                ft.Text(
-                    item.title,
-                    size=20, 
-                    weight= ft.FontWeight.W_900),
+            exp_btn = ft.FilledIconButton(
+
                 icon=ft.Icons.INFO, 
                 on_click=lambda e: page.show_dialog(exp)) # ! Shows the wrong object because of the way lambda functions
             img = ft.Image(
@@ -50,7 +47,7 @@ class Items(UI):
             controls=[
                 ft.ContextMenu(
                     primary_items=[
-                    ft.PopupMenuItem(content="Create", on_click=lambda e: print('click1')),
+                    ft.PopupMenuItem(content="Create", on_click=page_switch),
                     ft.PopupMenuItem(content="Update", on_click=lambda e: print('click2')),
                 ],
                 primary_trigger=ft.ContextMenuTrigger.DOWN,
@@ -63,7 +60,7 @@ class Items(UI):
                     content=ft.Text("Menü"),
                 )),
                 
-                ft.TextField(label = "Suche",
+                ft.TextField(label = "Suche", #! Switch to SearchBar
                              on_change=lambda e: print(e.control.value),
 
                             )
