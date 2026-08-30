@@ -1,145 +1,81 @@
 from src.databases.common.constants import ( Base, Column, String, Integer, Numeric )
+from src.common.valid_nutrient_validation import is_valid_nutrient_string
+from sqlalchemy.orm import validates
+from sqlalchemy import JSON
+
+class NutrientSet:
+    
+    SETNAMES = 'FETTSÄUREN_UND_Zucker', 'MINERALSTOFFE_SPURENELEMENTE', 'VITAMINE', 'AMINOSÄUREN', 'PERFORMANCE_SUPPLEMENTS'
+    
+    
+    FETTSÄUREN_UND_ZUCKER = 'einfach_ungesaettigte_fettsaeuren', 'mehrfach_ungesaettigte_fettsaeuren', 'omega_3', 'omega_6', 'trans_fettsaeuren', 'mehrwertige_alkohole'
+    
+    MINERALSTOFFE_SPURENELEMENTE = 'kalium', 'kalzium', 'magnesium', 'eisen', 'zink',
+    
+    VITAMINE = 'A', 'E', 'K', 'C', 'D', 'B1', 'B2', 'B3', 'B5', 'B6', 'B7', 'B9', 'B12' , 'beta_carotin'
+
+    AMINOSÄUREN = 'bcaa', 'eaas', 'l_glutamin', 'l_arginin', 'l_citrullin',
+    
+    PERFORMANCE_SUPPLEMENTS = 'kreatin', 'beta_alanin', 'taurin', 'koffein', 'l_carnitin', 'l_theanin', 'n_acetyl_l_tyrosin'
+    
+class ItemColumns:
+    """
+    ? Diese Tuples bilden eine Ausnahme und werden nicht zur Erstellung eines Dicts verwendet, sondern um das erstellen von ExpansionTiles zu vereinfachen
+    """
+    
+    ESSENTIELL = 'titel', 'beschreibung', 'zutaten', 'vorschaubild', 'barcode', 'marke', 'serviermenge', 'gewicht', 'allergene', 'nova_gruppe', 'nutri_score'
+    
+    ERNÄHRUNGSTABELLE = 'kalorien', 'fett', 'davon_gesättigte_fettsäuren', 'kohlenhydrate', 'ballaststoffe', 'zucker', 'protein', 'salz'
+    
+
+
 class Item(Base):
     """
     Item-Table
-    
-    Alle Werte angegeben in gramm auf 100gramm.
     """
     __tablename__ = 'item'
     id = Column(Integer, primary_key=True)
     
-    title = Column(String, nullable= False)
-    description = Column(String)
-    ingredients = Column(String)
-    img = Column(String)
+    # 1. Essential
+    titel = Column(String, nullable= False)
+    beschreibung = Column(String)
+    zutaten = Column(String)
+    vorschaubild = Column(String)
     barcode = Column(String)
-    brand = Column(String)
-    
-    
-    calorific_value = Column(String)
-    fat = Column(String)
-    saturated_fatty_acids = Column(String)
-    carbohydrates = Column(String)
-    fiber = Column(String)
-    sugar = Column(String)
-    protein = Column(String)
-    salt = Column(String)
-    
-    unsaturated_fatty_acids = Column(String)
-    monounsaturated_fat = Column(String)
-    polyunsaturated_fat = Column(String)
-    omega_3 = Column(String)
-    omega_6 = Column(String)
-    trans_fat = Column(String)
-    polyols = Column(String)
-    vitamine_A = Column(String)
-    beta_carotine = Column(String)
-    vitamine_E = Column(String)
-    vitamine_K = Column(String)
-    zinc = Column(String)
-    iron = Column(String)
-    potassium = Column(String)
-    sodium = Column(String)
-    bcaa = Column(String)
-    eaas = Column(String)
-    l_glutamine = Column(String)
-    l_carnitine = Column(String)
-    taurine = Column(String)
-    l_theanine = Column(String)
-    serving_size = Column(String)
-    net_weight = Column(String)
-    allergens = Column(String)
-    nova_group = Column(String)
-    
-    vitamine_D = Column(String)
-    vitamine_C = Column(String)
-    vitamine_B1 = Column(String)
-    vitamine_B2 = Column(String)
-    vitamine_B3 = Column(String)
-    vitamine_B5 = Column(String)
-    vitamine_B6 = Column(String)
-    vitamine_B7 = Column(String)
-    vitamine_B9 = Column(String)
-    vitamine_B12 = Column(String)
-    
-    beta_alanine = Column(String)
-    creatine = Column(String)
-    magnesium = Column(String)
-    n_acetyl_l_tyrosin = Column(String)
-    l_arginin = Column(String)
-    l_citrullin = Column(String)
-    caffeine = Column(String)
-    calcium = Column(String)
-    
+    marke = Column(String)
+    serviermenge = Column(String)
+    gewicht = Column(String)
+    allergene = Column(String)
+    nova_gruppe = Column(String)
     nutri_score = Column(String)
+    # 2. Nutrition Table
+    kalorien = Column(String)
+    fett = Column(String)
+    davon_gesättigte_fettsäuren = Column(String)
+    kohlenhydrate = Column(String)
+    ballaststoffe = Column(String)
+    zucker = Column(String)
+    protein = Column(String)
+    salz = Column(String)
+    # 3.Vitamines & Other
+    VITAMINE = Column(JSON)
+    FETTSÄUREN_UND_ZUCKER = Column(JSON)
+    MINERALSTOFFE_SPURENELEMENTE = Column(JSON)
+    AMINOSÄUREN = Column(JSON)
+    PERFORMANCE_SUPPLEMENTS = Column(JSON)
     
-    @staticmethod
-    def getVarTable():
-        return [
-            'title',
-            'description',
-            'img',
-            'barcode',
-            'brand',
-            'calorific_value',
-            'fat',
-            'saturated_fatty_acids',
-            'carbohydrates',
-            'sugar',
-            'fiber',
-            'protein',
-            'salt',
-            'vitamine_D',
-            'vitamine_C',
-            'vitamine_B1',
-            'vitamine_B2',
-            'vitamine_B3',
-            'vitamine_B5',
-            'vitamine_B6',
-            'vitamine_B7',
-            'vitamine_B9',
-            'vitamine_B12',
-            'beta_alanine',
-            'creatine',
-            'magnesium',
-            'n_acetyl_l_tyrosin',
-            'l_arginin',
-            'l_citrullin',
-            'caffeine',
-            'calcium',
-            'nutri_score',
-            'ingredients',
-            "unsaturated_fatty_acids",
-            "monounsaturated_fat",
-            "polyunsaturated_fat",
-            "omega_3",
-            "omega_6",
-            "trans_fat",
-            "polyols",
-            "vitamine_A",
-            "beta_carotine",
-            "vitamine_E",
-            "vitamine_K",
-            "zinc",
-            "iron",
-            "potassium",
-            "sodium",
-            "bcaa",
-            "eaas",
-            "l_glutamine",
-            "l_carnitine",
-            "taurine",
-            "l_theanine",
-            "serving_size",
-            "net_weight",
-            "allergens",
-            "nova_group",
-        ]
-    @staticmethod
-    def getVarTableCropped():
-        t = Item.getVarTable()
-        t.remove('img')
-        t.remove('title')
-        t.remove('description')
-        t.remove('ingredients')
-        return t
+    
+    @validates('VITAMINE')
+    def validate_mass_fields(self, key, value):
+        
+        for k in value:
+            
+            if value[k] is None: continue
+            if value[k] not in NutrientSet.VITAMINE:
+                raise ValueError(f'{value[k]} is not in VITAMINE')
+            if is_valid_nutrient_string(value[k], 'mass'):
+                ...
+        
+        if value is not None and not is_valid_nutrient_string(value, 'mass'):
+            raise ValueError(f"Ungültiges Format für {key}: '{value}'")
+        return value

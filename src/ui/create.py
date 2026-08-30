@@ -1,16 +1,61 @@
 from src.ui.ui import UI
 from src.databases.data_access import Item, DAH
+from src.databases.items import NutrientSet, ItemColumns
 import flet as ft
+from src.ui.common.tf_creator import getExpansionTileWColumn
+def rusaac(text: str):
+    """
+    Replace underscore -> space, and apply capitalize
+    """
+    return text.replace('_',' ').capitalize()
+
+def rsadc(text:str):
+    """
+    Converts rusaac strings back to database-compatible
+    """
+    return text.replace(' ','_').lower()
+
 class CreateItemUI(UI):
     def __init__(self, page_switch, items_ui):
         super().__init__()
         self.items_ui = items_ui
         self.page_switch = page_switch
         self.textfields: list[ft.TextField | ft.Button] = []
-        for key in Item.getVarTable():
-            self.textfields.append(ft.TextField(label=key))
         
-        self.textfields.append(
+        essential_objects = []
+        nutrition_table_objects = []
+        _temp_textfields = []
+        
+        self.all_textfields = [] #? For fetching the data later
+        
+        for c in Item.__table__.columns:
+            name: str = c.name
+            rusaac_name = rusaac(name)
+            
+            if name in NutrientSet.__dict__:
+                _temp_textfields.append(
+                    self.createNutrientExpansionTileWColumn(name, rusaac_name)
+                ) 
+            elif name in ItemColumns.ESSENTIELL:
+                obj = self.getLTATF(name, pre='ESSENTIELL')
+                essential_objects.append(obj)
+            elif name in ItemColumns.ERNÄHRUNGSTABELLE:
+                obj = self.getLTATF(name, pre='ERNÄHRUNGSTABELLE')
+                nutrition_table_objects.append(obj)
+            elif name == 'id': continue #? Skip, we dont need it actually
+            else:
+                raise NotImplementedError(f'{rusaac_name} is not in ItemColumns or NutritionSet')
+
+
+        ESSENTIALS = getExpansionTileWColumn(rusaac('ESSENTIELL'),essential_objects)
+        
+        NUTRITION_TABLE = getExpansionTileWColumn(rusaac('ERNÄHRUNGSTABELLE'), nutrition_table_objects)
+        self.addTf(ESSENTIALS)
+        self.addTf(NUTRITION_TABLE)
+        self.textfields.extend(_temp_textfields)
+        
+        
+        self.addTf(
             ft.Button(content=ft.Text('Erstellen'), icon=ft.Icons.CREATE, on_click=self.createAndLeftPage)
             )
         
@@ -27,6 +72,43 @@ class CreateItemUI(UI):
         self.container = ft.Column(
             controls=list_container
         )
+        
+        print(self.getAllEntrys())
+    def addTf(self, obj):
+        self.textfields.append(obj)
+        
+    def getTf(self, text: str, pre: str):
+        tf = ft.TextField(label= rusaac(text))
+        tf.innerData = { 'id': f'{pre}:{text}' }
+        self.all_textfields.append(tf)
+        return tf
+    
+    def getLTATF(self, text: str, pre: str):
+        return ft.ListTile(self.getTf(text, pre))
+        
+        
+    def createNutrientExpansionTileWColumn(self, name: str, rname: str) -> ft.Column:
+        other_objects = []
+        for k in getattr(NutrientSet, name):
+            obj = self.getLTATF(k, name)
+            other_objects.append(obj)
+        
+        ETS = getExpansionTileWColumn(rname, other_objects)
+        return ETS
+           
+    def getAllEntrys(self) -> list:
+        tree:dict[str, dict] = {}
+        for entry in self.all_textfields:
+            if 'id' not in entry.innerData:
+                raise NotImplementedError()
+            id = entry.innerData['id']
+            _type, key = id.split(':')
+            if _type in tree:
+                tree[_type][key] = entry.value
+            else:
+                tree[_type] = {}
+        print(tree)
+    
     def createAndLeftPage(self):
         data = {tf.label: tf.value for tf in self.textfields if isinstance(tf, ft.TextField)}
         print(data)
@@ -41,6 +123,8 @@ class CreateItemUI(UI):
         DAH.createItem(**data)
         self.items_ui.reset_list()
         self.page_switch()
+        
+        
     def get(self):
         return self.container
           

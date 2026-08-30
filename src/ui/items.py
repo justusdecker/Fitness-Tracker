@@ -61,27 +61,29 @@ class Items(UI):
             dlg.open = False
             e.page.update()
         for item in DAH.readItems():
-            
+            item: Item
             
             
             img = ft.Image(
-                        src=item.img,
+                        src=item.vorschaubild,
                         width=200,
                         height=150,
                         fit="cover",
                         border_radius=ft.BorderRadius.all(8),
                     )
+            exp_t = ft.TextButton("Okay")
             exp = ft.AlertDialog(
                 title=ft.Text("Information"),
                 content=ft.Text(self.getNutritionInfo(item)),
-                actions=[ft.TextButton("Okay",on_click=lambda e: close_dialog(e,exp))],
+                actions=[exp_t],
                 icon=ft.Icons.INFO
             )
+            exp_t.on_click = lambda e , exp = exp: close_dialog(e,exp)
             
             exp_btn = ft.Button(
-                content=ft.Text(item.title),
+                content=ft.Text(item.titel),
                 icon=ft.Icons.INFO, 
-                on_click=lambda e, item = item: self.page.show_dialog(exp)) # ! Shows the wrong object because of the way lambda functions
+                on_click=lambda e, exp = exp: self.page.show_dialog(exp)) # ! Shows the wrong object because of the way lambda functions
             
             ammi = ft.TextField(label='Amount', width=120)
             enter = ft.Button(ft.Text('Enter'), width=120)
@@ -111,8 +113,9 @@ class Items(UI):
         # UI aktualisieren
         self.list_view.update()
     def getNutritionInfo(self,item):
+        return ''
         var_table = Item.getVarTableCropped()
-        text = '\n'.join([f'{key:<15}{item.__getattribute__(key)}' for key in var_table])
+        text = '\n'.join([f'{key:<15}{item.__getattribute__(key)}' for key in var_table if item.__getattribute__(key) is not None])
         text += f'\n {item.title} {item.id}'
         return text
     

@@ -4,16 +4,16 @@ from src.databases.data_access import DAH, Item
 from src.ui.items import Items as ItemsUI
 from src.ui.settings import Settings as SettingsUI
 from src.ui.create import CreateItemUI
-from src.ui.body import Body
-"""
+from src.ui.body import BodyUI
+
 for i in range(5):
     DAH.createItem(
         **{
-            'title': 'test_object' + str(i),
-            'img': 'https://www.vitaminexpress.org/_next/image?url=https%3A%2F%2Fimages.cdn.europe-west1.gcp.commercetools.com%2F783def08-dd2b-475d-b671-c397c0c2dbd7%2F6958-04-L-Arginin_70-SjmjxvAb.png&w=1440&q=80'
+            'titel': 'test_object' + str(i),
+            'vorschaubild': 'https://www.vitaminexpress.org/_next/image?url=https%3A%2F%2Fimages.cdn.europe-west1.gcp.commercetools.com%2F783def08-dd2b-475d-b671-c397c0c2dbd7%2F6958-04-L-Arginin_70-SjmjxvAb.png&w=1440&q=80'
         }
     )
-"""
+
 
 
 
@@ -31,7 +31,7 @@ def main(page: ft.Page):
     IUI = ItemsUI(page, window2createitem)
     CIUI = CreateItemUI(window2readitem, IUI)
     SUI = SettingsUI()
-    BUI = Body()
+    BUI = BodyUI()
     
     def on_nav_change(e):
         index = e.control.selected_index
