@@ -2,7 +2,7 @@ from src.ui.ui import UI
 from src.databases.data_access import Item, DAH
 from src.databases.items import NutrientSet, ItemColumns
 import flet as ft
-
+from src.ui.common.tf_creator import getExpansionTileWColumn
 def rusaac(text: str):
     """
     Replace underscore -> space, and apply capitalize
@@ -14,25 +14,6 @@ def rsadc(text:str):
     Converts rusaac strings back to database-compatible
     """
     return text.replace(' ','_').lower()
-
-
-def getExpansionTileWColumn(text: str, objects, subtitle = 'Placeholder') -> ft.Column:
-    return ft.Column(
-            spacing=0,
-            controls=[
-                ft.ExpansionTile(
-                    expanded=True,
-                    title=ft.Text(text),
-                    subtitle=ft.Text(subtitle),
-                    affinity=ft.TileAffinity.PLATFORM,
-                    maintain_state=True,
-                    collapsed_text_color=ft.Colors.BLACK,
-                    text_color=ft.Colors.BLACK_87,
-                    controls=objects
-                ),
-                
-            ],
-        )
 
 class CreateItemUI(UI):
     def __init__(self, page_switch, items_ui):
