@@ -64,11 +64,15 @@ class Item(Base):
     AMINOSÄUREN = Column(JSON)
     PERFORMANCE_SUPPLEMENTS = Column(JSON)
     
-    @validates('other')
+    
+    @validates('VITAMINE')
     def validate_mass_fields(self, key, value):
         
         for k in value:
+            
             if value[k] is None: continue
+            if value[k] not in NutrientSet.VITAMINE:
+                raise ValueError(f'{value[k]} is not in VITAMINE')
             if is_valid_nutrient_string(value[k], 'mass'):
                 ...
         
