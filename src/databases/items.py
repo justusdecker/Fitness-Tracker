@@ -63,6 +63,7 @@ class Item(Base):
     PERFORMANCE_SUPPLEMENTS = Column(JSON)
     @validates('kalorien', 'fett', 'davon_gesättigte_fettsäuren', 'kohlenhydrate', 'ballaststoffe', 'zucker', 'protein', 'salz')
     def validate_nutrition_fields(self, key, value):
+        if value is None: return value
         Mass(value).get()            
         return value   
     
