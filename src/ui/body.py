@@ -14,12 +14,32 @@ class BodyUI(UI):
         all_charts = [
             getExpansionTileWColumn(str(i), [self.getLC()], ) for i in range(10)
         ]
-        
-        result = ft.ListView(
+        lv = ft.ListView(
 
-            controls=[avatar_name,
+            controls=[
+                      avatar_name,
                       *all_charts]
         )
+        
+        el = ft.ListView(
+            controls=[
+                ft.Text(f'el_{i}') for i in range(12)
+            ]
+        )
+        
+        bm = ft.ListView(
+            controls=[
+                ft.Text(f'bm_{i}') for i in range(12)
+            ]
+        )
+        
+        a = ft.ListView(
+            controls=[
+                ft.Text(f'a_{i}') for i in range(12)
+            ]
+        )
+        
+        result = self.getTabs(lv, el, bm, a)
         
         self.container = ft.Container(
             content=result,
@@ -27,7 +47,47 @@ class BodyUI(UI):
             border_radius=ft.BorderRadius.all(5),
             expand=True
         )
-        
+    
+    def getTabs(self, lv, el, bm, a):
+        return ft.Tabs(
+            length=4,
+            expand=True,
+            content=ft.Column(
+                expand=True,
+                controls=[
+                    ft.TabBar(
+                        tabs=[
+                            ft.Tab(label="Analyse", icon= ft.Icons.ANALYTICS),
+                            ft.Tab(label="Ernährung", icon=ft.Icons.FOOD_BANK),
+                            ft.Tab(label="Körpermaße", icon=ft.Icons.BOY_ROUNDED),
+                            ft.Tab(label="Aktivität", icon=ft.Icons.SPORTS)
+                        ]
+                    ),
+                    ft.TabBarView(
+                        expand=True,
+                        controls=[
+                            ft.Container(
+                                alignment=ft.Alignment.CENTER,
+                                content=lv,
+                            ),
+                            ft.Container(
+                                alignment=ft.Alignment.CENTER,
+                                content=el,
+                            ),
+                            ft.Container(
+                                alignment=ft.Alignment.CENTER,
+                                content=bm,
+                            ),
+                            ft.Container(
+                                alignment=ft.Alignment.CENTER,
+                                content=a,
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        )
+    
     def getLC(self):
         return ft.Container(
             
