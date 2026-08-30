@@ -1,7 +1,7 @@
 from src.ui.ui import UI
 import flet as ft
 from src.databases.data_access import DAH, Item
-
+from src.databases.items import ItemColumns, NutrientSet
 class Items(UI):
     def __init__(self, page, page_switch):
         super().__init__()
@@ -21,10 +21,10 @@ class Items(UI):
                 content=ft.Container(
                     key="context_menu_trigger_area",
                     expand=True,
-                    bgcolor=ft.Colors.BLUE,
+                    bgcolor=ft.Colors.TRANSPARENT,
                     alignment=ft.Alignment.CENTER,
                     border_radius=ft.BorderRadius.all(12),
-                    content=ft.Text("Menü"),
+                    content=ft.IconButton(ft.Icons.MENU),
                 )),
                 
                 ft.TextField(label = "Suche", #! Switch to SearchBar
@@ -74,7 +74,7 @@ class Items(UI):
             exp_t = ft.TextButton("Okay")
             exp = ft.AlertDialog(
                 title=ft.Text("Information"),
-                content=ft.Text(self.getNutritionInfo(item)),
+                content=self.getNutritionInfo(item),
                 actions=[exp_t],
                 icon=ft.Icons.INFO
             )
@@ -112,12 +112,57 @@ class Items(UI):
         
         # UI aktualisieren
         self.list_view.update()
-    def getNutritionInfo(self,item):
-        return ''
-        var_table = Item.getVarTableCropped()
-        text = '\n'.join([f'{key:<15}{item.__getattribute__(key)}' for key in var_table if item.__getattribute__(key) is not None])
-        text += f'\n {item.title} {item.id}'
-        return text
+    def getNutritionInfo(self, item) -> ft.DataTable:
+        var_table = []
+
+        # 1. Daten einsammeln
+        unset_keys = 0
+        unset_sub_keys = 0
+        for col in Item.__table__.columns:
+            key = col.name
+            val = getattr(item, key, None)
+            if val is None:
+                unset_keys += 1
+                if key in NutrientSet.__dict__:
+                    for sub_key in getattr(NutrientSet, key):
+                        unset_sub_keys += 1
+                continue
+
+            if key in NutrientSet.__dict__:
+                for sub_key in getattr(NutrientSet, key):
+                    sub_val = getattr(item, sub_key, None)
+                    if sub_val is not None:
+                        # Falls es sich um ein Gewicht/Mass-Objekt handelt, get() nutzen
+                        formatted_val = sub_val.get('auto') if hasattr(sub_val, 'get') else str(sub_val)
+                        var_table.append((sub_key, formatted_val))
+                    else:
+                        unset_sub_keys += 1
+            elif key in ItemColumns.ESSENTIELL or key in ItemColumns.ERNÄHRUNGSTABELLE:
+                
+                formatted_val = val.get('auto') if hasattr(val, 'get') else str(val)
+                if len(formatted_val) > 40:
+                    formatted_val = formatted_val[:40] + '...' # Cap the string at 40 char max + 3 for ellipsies
+                var_table.append((key, formatted_val))
+        var_table.append(('Nicht gesetzt', str(unset_keys)))
+        var_table.append(('Nicht gesetzt:s', str(unset_sub_keys)))
+        # 2. Flet DataTable für das Popup generieren
+        return ft.DataTable(
+            columns=[
+                ft.DataColumn(ft.Text("Nährstoff / Eigenschaft", weight=ft.FontWeight.BOLD)),
+                ft.DataColumn(ft.Text("Wert", weight=ft.FontWeight.BOLD), numeric=True),
+            ],
+            rows=[
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(ft.Text(k.replace('_', ' ').capitalize())),
+                        ft.DataCell(ft.Text(str(v))),
+                    ]
+                )
+                for k, v in var_table
+            ],
+            heading_row_height=40,
+            data_row_min_height=35,
+        )
     
     def enable(self): ...
     
