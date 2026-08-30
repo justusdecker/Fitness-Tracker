@@ -73,7 +73,6 @@ class CreateItemUI(UI):
             controls=list_container
         )
         
-        print(self.getAllEntrys())
     def addTf(self, obj):
         self.textfields.append(obj)
         
@@ -107,19 +106,29 @@ class CreateItemUI(UI):
                 tree[_type][key] = entry.value
             else:
                 tree[_type] = {}
-        print(tree)
+
+    
+    def __orderTextFields(self):
+        ordered = {}
+        for tf in self.all_textfields:
+            print(tf.label, tf.value, tf.innerData)
+            _type, key = tf.innerData['id'].split(':')
+            
+            if _type == 'ESSENTIELL' or _type == 'ERNÄHRUNGSTABELLE':
+                ordered[key] = tf.value if tf.value else None
+                continue
+
+            if _type in ordered:
+                ordered[_type][key] = tf.value if tf.value else None
+            else:
+                ordered[_type] = {}
+                ordered[_type][key] = tf.value if tf.value else None
+            
+        print(ordered)
+        return ordered
     
     def createAndLeftPage(self):
-        data = {tf.label: tf.value for tf in self.textfields if isinstance(tf, ft.TextField)}
-        print(data)
-        
-        tk = Item.getVarTable()
-        
-        for key in tk:
-            if key in data:
-                if data[key] == '': 
-                    data[key] = None
-                    continue
+        data = self.__orderTextFields()
         DAH.createItem(**data)
         self.items_ui.reset_list()
         self.page_switch()
