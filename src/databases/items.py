@@ -1,12 +1,12 @@
 from src.databases.common.constants import ( Base, Column, String, Integer, Numeric )
 from src.common.valid_nutrient_validation import is_valid_nutrient_string
+from src.common.unit_convert import Mass
 from sqlalchemy.orm import validates
 from sqlalchemy import JSON
 
 class NutrientSet:
     
-    SETNAMES = 'FETTSÄUREN_UND_Zucker', 'MINERALSTOFFE_SPURENELEMENTE', 'VITAMINE', 'AMINOSÄUREN', 'PERFORMANCE_SUPPLEMENTS'
-    
+    SETNAMES = 'FETTSÄUREN_UND_ZUCKER', 'MINERALSTOFFE_SPURENELEMENTE', 'VITAMINE', 'AMINOSÄUREN', 'PERFORMANCE_SUPPLEMENTS'
     
     FETTSÄUREN_UND_ZUCKER = 'einfach_ungesaettigte_fettsaeuren', 'mehrfach_ungesaettigte_fettsaeuren', 'omega_3', 'omega_6', 'trans_fettsaeuren', 'mehrwertige_alkohole'
     
@@ -27,8 +27,6 @@ class ItemColumns:
     
     ERNÄHRUNGSTABELLE = 'kalorien', 'fett', 'davon_gesättigte_fettsäuren', 'kohlenhydrate', 'ballaststoffe', 'zucker', 'protein', 'salz'
     
-
-
 class Item(Base):
     """
     Item-Table
@@ -63,19 +61,19 @@ class Item(Base):
     MINERALSTOFFE_SPURENELEMENTE = Column(JSON)
     AMINOSÄUREN = Column(JSON)
     PERFORMANCE_SUPPLEMENTS = Column(JSON)
+    @validates('kalorien', 'fett', 'davon_gesättigte_fettsäuren', 'kohlenhydrate', 'ballaststoffe', 'zucker', 'protein', 'salz')
+    def validate_nutrition_fields(self, key, value):
+        Mass(value).get()            
+        return value   
     
-    
-    @validates('VITAMINE')
-    def validate_mass_fields(self, key, value):
-        
+    @validates('VITAMINE', 'FETTSÄUREN_UND_ZUCKER', 'MINERALSTOFFE_SPURENELEMENTE', 'AMINOSÄUREN', 'PERFORMANCE_SUPPLEMENTS')
+    def validate_json_fields(self, key, value):
         for k in value:
-            
             if value[k] is None: continue
             if value[k] not in NutrientSet.VITAMINE:
                 raise ValueError(f'{value[k]} is not in VITAMINE')
-            if is_valid_nutrient_string(value[k], 'mass'):
-                ...
-        
-        if value is not None and not is_valid_nutrient_string(value, 'mass'):
-            raise ValueError(f"Ungültiges Format für {key}: '{value}'")
+            Mass(value[k]).get()
+            
         return value
+
+        
