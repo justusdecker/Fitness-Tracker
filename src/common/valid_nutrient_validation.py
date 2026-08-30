@@ -6,7 +6,7 @@ ValidationMode = Literal['mass', 'volume', 'energy', 'count', 'any']
 
 # 2. Zuordnung der erlaubten Einheiten pro Modus
 ALLOWED_UNITS: dict[str, list[str]] = {
-    'mass': ['g', 'mg', 'mcg', 'µg', 'ug', 'kg'],
+    'mass': ['g', 'mg', 'mcg', 'µg', 'ug', 'kg', 'ng'],
     'volume': ['l', 'ml', 'dl', 'cl'],
     'energy': ['kcal', 'kj', 'cal'],
     'count': [
