@@ -4,11 +4,11 @@ from sqlalchemy.orm import validates
 from sqlalchemy import JSON
 
 class NutrientSet:
-    # Fettsäuren & Zucker
+    
     SETNAMES = 'FETTSÄUREN_UND_Zucker', 'MINERALSTOFFE_SPURENELEMENTE', 'VITAMINE', 'AMINOSÄUREN', 'PERFORMANCE_SUPPLEMENTS'
     
-    FETTSÄUREN_UND_ZUCKER = 'einfach_ungesaettigte_fettsaeuren', 'mehrfach_ungesaettigte_fettsaeuren',
-    'omega_3', 'omega_6', 'trans_fettsaeuren', 'mehrwertige_alkohole'
+    
+    FETTSÄUREN_UND_ZUCKER = 'einfach_ungesaettigte_fettsaeuren', 'mehrfach_ungesaettigte_fettsaeuren', 'omega_3', 'omega_6', 'trans_fettsaeuren', 'mehrwertige_alkohole'
     
     MINERALSTOFFE_SPURENELEMENTE = 'kalium', 'kalzium', 'magnesium', 'eisen', 'zink',
     
@@ -16,9 +16,19 @@ class NutrientSet:
 
     AMINOSÄUREN = 'bcaa', 'eaas', 'l_glutamin', 'l_arginin', 'l_citrullin',
     
-    PERFORMANCE_SUPPLEMENTS = 'kreatin', 'beta_alanin', 'taurin', 'koffein', 
-    'l_carnitin', 'l_theanin', 'n_acetyl_l_tyrosin'
+    PERFORMANCE_SUPPLEMENTS = 'kreatin', 'beta_alanin', 'taurin', 'koffein', 'l_carnitin', 'l_theanin', 'n_acetyl_l_tyrosin'
     
+class ItemColumns:
+    """
+    ? Diese Tuples bilden eine Ausnahme und werden nicht zur Erstellung eines Dicts verwendet, sondern um das erstellen von ExpansionTiles zu vereinfachen
+    """
+    
+    ESSENTIELL = 'titel', 'beschreibung', 'zutaten', 'vorschaubild', 'barcode', 'marke', 'serviermenge', 'gewicht', 'allergene', 'nova_gruppe', 'nutri_score'
+    
+    ERNÄHRUNGSTABELLE = 'kalorien', 'fett', 'davon_gesättigte_fettsäuren', 'kohlenhydrate', 'ballaststoffe', 'zucker', 'protein', 'salz'
+    
+
+
 class Item(Base):
     """
     Item-Table
@@ -36,7 +46,7 @@ class Item(Base):
     serviermenge = Column(String)
     gewicht = Column(String)
     allergene = Column(String)
-    nova_group = Column(String)
+    nova_gruppe = Column(String)
     nutri_score = Column(String)
     # 2. Nutrition Table
     kalorien = Column(String)
