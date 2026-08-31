@@ -1,6 +1,7 @@
 from typing import List
 from src.databases.common.constants import *
 from src.databases.items import Item
+from src.databases.body import EatenLog
 class SQLAccess:
     @staticmethod
     def close_and_dispose(s=None,e=None):
@@ -30,7 +31,14 @@ class DAH:
         session.add(obj)
         session.commit()
     
-    
+    def createEatenLogEntry(**data):
+        print(data, EatenLog.__table__.columns)
+        obj = EatenLog(**data)
+        session.add(obj)
+        session.commit()
+        
+    def readEatenLogs() -> List[EatenLog]:
+        return session.query(EatenLog).all()
     
     def readItems() -> List[Item]: 
         return session.query(Item).all()
