@@ -1,0 +1,35 @@
+[build-system]
+    requires = ["setuptools >= 77.0.3"]
+    build-backend = "setuptools.build_meta"
+[project]
+    name = "FitnessTracker"
+    description = "Tracke deine Kalorien, Vitamine, Supplements, deinen Umfang und mehr..."
+    readme = "README.md"
+    license = "GPL-3.0"
+    license-files = ["LICEN[CS]E*"]
+    keywords = [
+
+    ]
+    authors = [
+    {name = "Justus Decker", email = "justus.d2025@gmail.com"},
+    ]
+    maintainers = [
+    {name = "Justus Decker", email = "justus.d2025@gmail.com"}
+    ]
+    version = "0.5.2026"
+    dependencies = [
+        "flet",
+        "flet-charts",
+        "SQLAlchemy"
+    ]
+    requires-python = ">= 3.13.3"
+
+[project.urls]
+    Homepage = "https://example.com"
+    Documentation = "https://readthedocs.org"
+    Repository = "https://github.com/me/spam.git"
+    Issues = "https://github.com/me/spam/issues"
+    Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
+
+[tool.pytest.ini_options]
+pythonpath = "."
