@@ -2,6 +2,7 @@ from src.ui.ui import UI
 import flet as ft
 from src.databases.data_access import DAH, Item
 from src.databases.items import ItemColumns, NutrientSet
+from datetime import datetime, timezone
 class Items(UI):
     def __init__(self, page, page_switch):
         super().__init__()
@@ -87,6 +88,14 @@ class Items(UI):
             
             ammi = ft.TextField(label='Amount', width=120)
             enter = ft.Button(ft.Text('Enter'), width=120)
+            func = lambda e, ammi = ammi: self.createEntry(ammi)
+            ammi.on_submit = func
+            enter.on_click = func
+            
+            ammi.innerData = {
+                'item': item,
+            }
+            
             obj = ft.Container(
                 ft.Column(
                     controls=[
@@ -101,6 +110,21 @@ class Items(UI):
                 bgcolor=ft.Colors.WHITE_10
             )
             self.textfields.append(obj)
+    
+    def createEntry(self, ammi):
+        print('create')
+        lbl, val = ammi.label, ammi.value  
+        data = {
+            'amount': val,
+            'timestamp': datetime.now(timezone.utc),
+            'item': ammi.innerData['item']
+        }      
+        DAH.createEatenLogEntry(**data)
+        # * Get Time
+        # * Check ammount
+        # * reset -> eatenlog page
+        
+        
     def reset_list(self):
         # Alte Elemente entfernen
         self.list_view.controls.clear()
