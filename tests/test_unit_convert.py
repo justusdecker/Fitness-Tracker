@@ -1,0 +1,18 @@
+import pytest as pt
+from src.common.unit_convert import Mass
+def test_mass():
+    a = Mass('10kg')
+    b = Mass('2000g')
+    c = Mass('200000mg')
+    with pt.raises(TypeError):
+        Mass('1kg1')
+    with pt.raises(TypeError):
+        Mass('1t')
+    
+    assert b.get() == '2kg', '2000g = 2kg'
+    with pt.raises(NameError):
+        a.get('abc')
+    with pt.raises(TypeError):
+        a.calc(132,'kg')
+    with pt.raises(NameError):
+        a.calc(b,'auto')
