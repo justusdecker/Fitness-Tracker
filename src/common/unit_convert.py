@@ -44,8 +44,11 @@ class Mass:
         self.weight = float(num_str) * MD[unit]
     
     def calc(self, other: MassLike, _resType: MassResultType):
+        if _resType not in MASS_FACTORS:
+            raise NameError(f'{_resType} does not exist in here')
+        if not isinstance(other, Mass):
+            raise TypeError('Incompatible Calc')
         i = MASS_FACTORS.index(_resType)
-        print(i, MASS_FACTORS[i])
         if _resType == 'kg':
             return (self.weight + other.weight) * MASS[i][1]
         else:
@@ -53,6 +56,9 @@ class Mass:
         
         
     def get(self, _resType: str = 'auto') -> str:
+        if _resType not in list(MASS_FACTORS) + ['auto']:
+            raise NameError(f'{_resType} does not exist in here')
+        
         # 1. Base weight in grams (assuming self.weight is in grams)
         base_g = self.weight  
 
@@ -72,10 +78,3 @@ class Mass:
         # 4. Format cleanly (removes trailing .0 for whole numbers)
         formatted_weight = f"{weight:.3f}".rstrip('0').rstrip('.') if isinstance(weight, float) else weight
         return f"{formatted_weight}{_resType}"
-
-
-a = Mass('10kg')
-b = Mass('2000g')
-c = Mass('200000mg')
-print(a.get('ng'), b.get('mg'), a.get(), b.get(), c.get())
-print(a.calc(b, 'mg'))
