@@ -1,6 +1,7 @@
 from src.ui.ui import UI
 import flet as ft
 import flet_charts as fch
+from src.databases.data_access import DAH
 
 from src.ui.common.tf_creator import getExpansionTileWColumn
 class BodyUI(UI):
@@ -21,11 +22,7 @@ class BodyUI(UI):
                       *all_charts]
         )
         
-        el = ft.ListView(
-            controls=[
-                ft.Text(f'el_{i}') for i in range(12)
-            ]
-        )
+        el = self.getEatenLogEntrys()
         
         bm = ft.ListView(
             controls=[
@@ -48,6 +45,15 @@ class BodyUI(UI):
             expand=True
         )
     
+    def getEatenLogEntrys(self):
+        
+        el = ft.ListView(
+            controls=[
+                ft.Text(f'{el.timestamp}') for el in DAH.readEatenLogs()
+            ]
+        )
+        return el
+
     def getTabs(self, lv, el, bm, a):
         return ft.Tabs(
             length=4,
