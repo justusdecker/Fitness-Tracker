@@ -2,7 +2,7 @@ import re
 from typing import Literal, Optional
 
 # 1. Definition der erlaubten Modi als Literal Type
-ValidationMode = Literal['mass', 'volume', 'energy', 'count', 'any']
+ValidationMode = Literal['mass', 'volume', 'energy', 'count']
 
 # 2. Zuordnung der erlaubten Einheiten pro Modus
 ALLOWED_UNITS: dict[str, list[str]] = {
@@ -15,12 +15,12 @@ ALLOWED_UNITS: dict[str, list[str]] = {
     ]
 }
 
-def is_valid_nutrient_string(value: Optional[str], mode: ValidationMode = 'any') -> bool:
+def is_valid_nutrient_string(value: Optional[str], mode: ValidationMode) -> bool:
     """
     Prüft, ob ein Nährwert-String für den angegebenen Modus gültig ist.
     
     :param value: Der zu prüfende String (z. B. "500mg", "1.2 g", "1,5 l", "500 kcal", "<0.1g")
-    :param mode: Der Modus ('mass', 'volume', 'energy', 'count', 'any')
+    :param mode: Der Modus ('mass', 'volume', 'energy', 'count')
     :return: True wenn der String dem Muster entspricht, sonst False
     """
     if value is None:
@@ -35,12 +35,11 @@ def is_valid_nutrient_string(value: Optional[str], mode: ValidationMode = 'any')
         return False
 
     # Erlaubte Einheiten ermitteln
-    if mode == 'any':
-        allowed_units = [unit for units in ALLOWED_UNITS.values() for unit in units]
-    elif mode in ALLOWED_UNITS:
+
+    if mode in ALLOWED_UNITS:
         allowed_units = ALLOWED_UNITS[mode]
     else:
-        raise ValueError(f"Ungültiger Modus: {mode}. Erlaubt sind: mass, volume, energy, count, any")
+        raise ValueError(f"Ungültiger Modus: {mode}. Erlaubt sind: mass, volume, energy, count")
 
     # RegEx-Pattern erstellen:
     # 1. Optionales Spuren-Zeichen (< oder >) mit optionalen Leerzeichen
