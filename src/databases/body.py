@@ -34,9 +34,9 @@ class EatenLog(Base):
     __tablename__ = 'eaten_log'
 
     id = Column(Integer, primary_key=True)
-    amount_g = Column(Float, nullable=False)        # Menge in Gramm (z. B. 400.0 für Gratin)
+    amount = Column(String, nullable=False)        # Menge in Gramm (z. B. 400.0 für Gratin)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     # Verknüpfung zur bestehenden Ernährungs-Datenbank
-    food_id = Column(Integer, ForeignKey('food_items.id'), nullable=False)
-    food_item = relationship("FoodItem", back_populates="eaten_entries")
+    item_id = Column(Integer, ForeignKey('item.id'), nullable=False)
+    item = relationship("Item")
