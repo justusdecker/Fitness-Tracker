@@ -5,6 +5,9 @@ from src.databases.data_access import DAH
 
 from src.ui.common.tf_creator import getExpansionTileWColumn
 class BodyUI(UI):
+    """
+    Contains all of the needed functionality for building the UI for the *Body* Page
+    """
     def __init__(self):
         super().__init__()
         self.textfields = []
@@ -45,8 +48,10 @@ class BodyUI(UI):
             expand=True
         )
     
-    def getEatenLogEntrys(self):
-        
+    def getEatenLogEntrys(self) -> ft.ListView:
+        """
+        Returns a ListView of Text with the contents of `EatenLogs`
+        """
         el = ft.ListView(
             controls=[
                 ft.Text(f'{el.timestamp}') for el in DAH.readEatenLogs()
@@ -54,7 +59,10 @@ class BodyUI(UI):
         )
         return el
 
-    def getTabs(self, lv, el, bm, a):
+    def getTabs(self, lv, el, bm, a) -> ft.Tabs:
+        """
+        Returns the Tabs for the Body Page, contains e.g.: Analysis, Activity etc.
+        """
         return ft.Tabs(
             length=4,
             expand=True,
@@ -94,7 +102,10 @@ class BodyUI(UI):
             ),
         )
     
-    def getLC(self):
+    def getLC(self) -> ft.Container:
+        """
+        Returns an Container filled with LineCharts for analysis.
+        """
         return ft.Container(
             
             border_radius=ft.BorderRadius.all(12),
