@@ -20,7 +20,7 @@ class MassLike:
 class Mass:
     def __init__(self, val: str):
         if not is_valid_nutrient_string(val, 'mass'):
-            raise TypeError(f'{val} is not valid')
+            raise TypeError(f'{val} is not valid, must be of type mass')
 
         self.__convert2GrammAndNumeric(val)
 

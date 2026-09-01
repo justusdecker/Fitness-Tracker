@@ -88,7 +88,7 @@ class Items(UI):
             
             amount_textfield = ft.TextField(label='Amount', width=120)
             amount_enter_button = ft.Button(ft.Text('Enter'), width=120)
-            eatenlog_sumit_function = lambda e, amount_textfield = amount_textfield: self.createEntry(ammi)
+            eatenlog_sumit_function = lambda e, amount_textfield = amount_textfield: self.createEntry(amount_textfield)
             amount_textfield.on_submit = eatenlog_sumit_function
             amount_enter_button.on_click = eatenlog_sumit_function
             
@@ -187,8 +187,6 @@ class Items(UI):
             heading_row_height=40,
             data_row_min_height=35,
         )
-    
-    def enable(self): ...
     
     def get(self):
         return self.container
