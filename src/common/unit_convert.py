@@ -18,6 +18,13 @@ class MassLike:
 
 
 class Mass:
+    """
+    This class is used to easy interact with masses like e.g.: **kg** and **g**
+    
+    Currently only Addition of two Mass-Classes is allowed
+    
+    You can get the Mass in you wanted Factory with `get()`
+    """
     def __init__(self, val: str):
         if not is_valid_nutrient_string(val, 'mass'):
             raise TypeError(f'{val} is not valid, must be of type mass')
@@ -25,11 +32,15 @@ class Mass:
         self.__convert2GrammAndNumeric(val)
 
     def __convert2GrammAndNumeric(self, val: str):
+        """
+        Removes Spaces, Norms **,** to **.**, Calculates back to gramm and Set the `self.weight` property.
+        
+        The unit will not be stored!
+        """
         MD = dict(MASS)
-        # 1. Leerzeichen entfernen und Strings wie "1.5 kg" oder "1,5kg" normieren
+        
         val_clean = str(val).strip().replace(',', '.')
         
-        # 2. Per Regex Zahl und Einheit sauber trennen
         match = re.match(r"^([+-]?\d*(?:\.\d+)?)\s*([a-zA-Zµ]+)$", val_clean)
         
         if not match:
@@ -39,11 +50,15 @@ class Mass:
         
         if unit not in MD:
             raise ValueError(f"Unknown unit: '{unit}'. Allowed units: {list(MD.keys())}")
-            
-        # 3. Umrechnung in Basis-Gramm (Zahl * Faktor)
+
         self.weight = float(num_str) * MD[unit]
     
     def calc(self, other: MassLike, _resType: MassResultType):
+        """
+        Returns the Sum of `self.weight` and `other.weight` in the wanted ResultType
+        
+        ResultTypes are defined in this file under `MASS_LIST` and `MASS_DICT`
+        """
         if _resType not in MASS_FACTORS:
             raise NameError(f'{_resType} does not exist in here')
         if not isinstance(other, Mass):
@@ -56,6 +71,9 @@ class Mass:
         
         
     def get(self, _resType: str = 'auto') -> str:
+        """
+        Get the `self.weight` property in the ResultType you want.
+        """
         if _resType not in MASS_LIST:
             raise NameError(f'{_resType} does not exist in here')
         
