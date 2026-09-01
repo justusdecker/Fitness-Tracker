@@ -136,10 +136,21 @@ class Items(UI):
         
         # UI aktualisieren
         self.list_view.update()
-    def getNutritionInfo(self, item) -> ft.DataTable:
+    def getNutritionInfo(self, item: Item, MAX_CHARS = 40) -> ft.DataTable:
+        """
+        Generates a `ft.DataTable` and returns it.
+        In the DataTable we show the values of the given item. 
+        We show the amount of unset_keys & unset_sub_keys too.
+        
+        * Item item: The item that you want to show
+        * int MAX_CHARS = 40: The maximum length of the text shown in the right section
+        Steps:
+        * Collect Data
+        * Generate Flet DataTable for the Popup
+        """
         var_table = []
 
-        # 1. Daten einsammeln
+
         unset_keys = 0
         unset_sub_keys = 0
         for col in Item.__table__.columns:
@@ -156,7 +167,6 @@ class Items(UI):
                 for sub_key in getattr(NutrientSet, key):
                     sub_val = getattr(item, sub_key, None)
                     if sub_val is not None:
-                        # Falls es sich um ein Gewicht/Mass-Objekt handelt, get() nutzen
                         formatted_val = sub_val.get('auto') if hasattr(sub_val, 'get') else str(sub_val)
                         var_table.append((sub_key, formatted_val))
                     else:
@@ -164,12 +174,12 @@ class Items(UI):
             elif key in ItemColumns.ESSENTIELL or key in ItemColumns.ERNÄHRUNGSTABELLE:
                 
                 formatted_val = val.get('auto') if hasattr(val, 'get') else str(val)
-                if len(formatted_val) > 40:
-                    formatted_val = formatted_val[:40] + '...' # Cap the string at 40 char max + 3 for ellipsies
+                if len(formatted_val) > MAX_CHARS:
+                    formatted_val = formatted_val[:MAX_CHARS] + '...' # Cap the string at 40 char max + 3 for ellipsies
                 var_table.append((key, formatted_val))
         var_table.append(('Nicht gesetzt', str(unset_keys)))
         var_table.append(('Nicht gesetzt:s', str(unset_sub_keys)))
-        # 2. Flet DataTable für das Popup generieren
+
         return ft.DataTable(
             columns=[
                 ft.DataColumn(ft.Text("Nährstoff / Eigenschaft", weight=ft.FontWeight.BOLD)),
