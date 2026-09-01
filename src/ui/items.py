@@ -88,9 +88,9 @@ class Items(UI):
             
             ammi = ft.TextField(label='Amount', width=120)
             enter = ft.Button(ft.Text('Enter'), width=120)
-            func = lambda e, ammi = ammi: self.createEntry(ammi)
-            ammi.on_submit = func
-            enter.on_click = func
+            eatenlog_sumit_function = lambda e, ammi = ammi: self.createEntry(ammi)
+            ammi.on_submit = eatenlog_sumit_function
+            enter.on_click = eatenlog_sumit_function
             
             ammi.innerData = {
                 'item': item,
