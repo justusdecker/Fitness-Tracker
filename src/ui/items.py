@@ -197,6 +197,3 @@ class Items(UI):
             heading_row_height=40,
             data_row_min_height=35,
         )
-    
-    def get(self):
-        return self.container
