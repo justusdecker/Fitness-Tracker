@@ -27,8 +27,8 @@ def is_valid_nutrient_string(value: Optional[str], mode: ValidationMode) -> bool
         return False
 
     # Falls versehentlich ein int oder float übergeben wird, in String umwandeln
-    if isinstance(value, (int, float)):
-        value = str(value)
+    if not isinstance(value, str):
+        raise TypeError('Value must be of type str')
 
     trimmed = value.strip()
     if not trimmed:
