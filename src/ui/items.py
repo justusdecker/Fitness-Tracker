@@ -86,13 +86,13 @@ class Items(UI):
                 icon=ft.Icons.INFO, 
                 on_click=lambda e, exp = exp: self.page.show_dialog(exp)) # ! Shows the wrong object because of the way lambda functions
             
-            ammi = ft.TextField(label='Amount', width=120)
-            enter = ft.Button(ft.Text('Enter'), width=120)
-            eatenlog_sumit_function = lambda e, ammi = ammi: self.createEntry(ammi)
-            ammi.on_submit = eatenlog_sumit_function
-            enter.on_click = eatenlog_sumit_function
+            amount_textfield = ft.TextField(label='Amount', width=120)
+            amount_enter_button = ft.Button(ft.Text('Enter'), width=120)
+            eatenlog_sumit_function = lambda e, amount_textfield = amount_textfield: self.createEntry(ammi)
+            amount_textfield.on_submit = eatenlog_sumit_function
+            amount_enter_button.on_click = eatenlog_sumit_function
             
-            ammi.innerData = {
+            amount_textfield.innerData = {
                 'item': item,
             }
             
@@ -102,7 +102,7 @@ class Items(UI):
                     ft.Row(
                         controls=[
                             ft.Column(controls=[exp_btn, img]),
-                            ft.Column(controls=[ammi, enter])],
+                            ft.Column(controls=[amount_textfield, amount_enter_button])],
                         ),
                     
                     ]
@@ -111,13 +111,13 @@ class Items(UI):
             )
             self.textfields.append(obj)
     
-    def createEntry(self, ammi):
+    def createEntry(self, amount_textfield):
         print('create')
-        lbl, val = ammi.label, ammi.value  
+        val = amount_textfield.value  
         data = {
             'amount': val,
             'timestamp': datetime.now(timezone.utc),
-            'item': ammi.innerData['item']
+            'item': amount_textfield.innerData['item']
         }      
         DAH.createEatenLogEntry(**data)
         # * Get Time
