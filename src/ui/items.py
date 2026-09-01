@@ -112,7 +112,12 @@ class Items(UI):
             self.textfields.append(obj)
     
     def createEntry(self, amount_textfield):
-        print('create')
+        """
+        Creates an Entry in the EatenLog Table
+         
+        TODO: Let the user decide what time it was! Currently it uses `datetime.now`.
+        TODO: Reset EatenLog Page
+        """
         val = amount_textfield.value  
         data = {
             'amount': val,
@@ -120,11 +125,7 @@ class Items(UI):
             'item': amount_textfield.innerData['item']
         }      
         DAH.createEatenLogEntry(**data)
-        # * Get Time
-        # * Check ammount
-        # * reset -> eatenlog page
-        
-        
+
     def reset_list(self):
         """
         Clears the `list_view.controls` and refill them with new elements. Requests a UI-update for the list_view
