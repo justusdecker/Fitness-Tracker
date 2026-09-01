@@ -1,6 +1,6 @@
 from src.common.valid_nutrient_validation import is_valid_nutrient_string
 import pytest as pt
-def test_ivns():
+def test_isValidNutrientString():
     
     # --- MODUS: MASS (Gewicht) ---
     assert is_valid_nutrient_string("500mg", "mass")
