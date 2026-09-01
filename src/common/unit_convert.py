@@ -9,7 +9,7 @@ MASS = (
     ('ng', 10**-9)
 )
 MASS_FACTORS = 'kg', 'g', 'mg', 'µg', 'ng'
-
+MASS_LIST = list(MASS_FACTORS) + ['auto']
 
 type MassResultType = Literal['kg'] | Literal['g'] | Literal['mg'] | Literal['µg'] | Literal['ng']
 class MassLike: 
@@ -56,7 +56,7 @@ class Mass:
         
         
     def get(self, _resType: str = 'auto') -> str:
-        if _resType not in list(MASS_FACTORS) + ['auto']:
+        if _resType not in MASS_LIST:
             raise NameError(f'{_resType} does not exist in here')
         
         # 1. Base weight in grams (assuming self.weight is in grams)
