@@ -33,12 +33,12 @@ class Mass:
         match = re.match(r"^([+-]?\d*(?:\.\d+)?)\s*([a-zA-Zµ]+)$", val_clean)
         
         if not match:
-            raise ValueError(f"Ungültiges Format für Gewichtsangabe: '{val}'")
+            raise ValueError(f"Invalid Format for Mass: '{val}'")
             
         num_str, unit = match.groups()
         
         if unit not in MD:
-            raise ValueError(f"Unbekannte Einheit '{unit}'. Erlaubt sind: {list(MD.keys())}")
+            raise ValueError(f"Unknown unit: '{unit}'. Allowed units: {list(MD.keys())}")
             
         # 3. Umrechnung in Basis-Gramm (Zahl * Faktor)
         self.weight = float(num_str) * MD[unit]
