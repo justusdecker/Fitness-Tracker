@@ -126,16 +126,20 @@ class Items(UI):
         
         
     def reset_list(self):
-        # Alte Elemente entfernen
+        """
+        Clears the `list_view.controls` and refill them with new elements. Requests a UI-update for the list_view
+        In short term: refresh
+        """
         self.list_view.controls.clear()
         print(self.list_view.controls.__len__())
         self.gen_new_textfields()
-        # Neue Elemente hinzufügen
+        
         print(self.textfields.__len__())
         
         
         # UI aktualisieren
         self.list_view.update()
+        
     def getNutritionInfo(self, item: Item, MAX_CHARS = 40) -> ft.DataTable:
         """
         Generates a `ft.DataTable` and returns it.
