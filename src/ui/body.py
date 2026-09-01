@@ -132,8 +132,3 @@ class BodyUI(UI):
                 
                 ],
             ))
-            
-        
-    
-    def get(self):
-        return self.container
