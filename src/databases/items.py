@@ -141,7 +141,7 @@ class Item(Base):
         Validates the NutritionTable
         """
         if value is None: return value
-        Mass(value).get()            
+        Mass(value)           
         return value   
     
     @validates('VITAMINE', 'FETTSÄUREN_UND_ZUCKER', 'MINERALSTOFFE_SPURENELEMENTE', 'AMINOSÄUREN', 'PERFORMANCE_SUPPLEMENTS')
@@ -153,7 +153,7 @@ class Item(Base):
             if value[k] is None: continue
             if value[k] not in NutrientSet.VITAMINE:
                 raise ValueError(f'{value[k]} is not in VITAMINE')
-            Mass(value[k]).get()
+            Mass(value[k])
             
         return value
 
