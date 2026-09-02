@@ -3,6 +3,8 @@ from src.databases.data_access import Item, DAH
 from src.databases.items import NutrientSet, ItemColumns
 import flet as ft
 from src.ui.common.tf_creator import getExpansionTileWColumn
+from src.common.decorators import notImplementedYet
+
 def rusaac(text: str):
     """
     Replace underscore -> space, and apply capitalize
@@ -74,19 +76,46 @@ class CreateItemUI(UI):
         )
         
     def addTf(self, obj):
+        """
+        Adds an Object to `self.textfields`
+        
+        :param obj: The object you want to add to the `self.textfields`
+        """
         self.textfields.append(obj)
         
-    def getTf(self, text: str, pre: str):
+    def getTf(self, text: str, pre: str) -> ft.TextField:
+        """
+        Used for the Create System.
+        
+        Sets the ID inside `tf.TextField.innerData`
+        
+        
+        :param pre: first part of the id
+        :param text: second part of the id
+        """
         tf = ft.TextField(label= rusaac(text))
         tf.innerData = { 'id': f'{pre}:{text}' }
         self.all_textfields.append(tf)
         return tf
     
-    def getLTATF(self, text: str, pre: str):
+    def getLTATF(self, text: str, pre: str) -> ft.ListTile:
+        """
+        
+        Gets a `ft.ListTile` with the result of `self.getTf(text, pre)`
+        
+        :param pre: first part of the id
+        :param text: second part of the id
+        """
         return ft.ListTile(self.getTf(text, pre))
         
-        
     def createNutrientExpansionTileWColumn(self, name: str, rname: str) -> ft.Column:
+        """
+        Creates and return the complete ExpansionTile for the NutritionEntry
+        
+        :param name: the key for fetching data of the `NutrientSet`
+        :param rname: the modified `name` value, `rusaac(name)`
+        
+        """
         other_objects = []
         for k in getattr(NutrientSet, name):
             obj = self.getLTATF(k, name)
@@ -94,9 +123,12 @@ class CreateItemUI(UI):
         
         ETS = getExpansionTileWColumn(rname, other_objects)
         return ETS
-           
+    @notImplementedYet
     def getAllEntrys(self) -> list:
-        tree:dict[str, dict] = {}
+        """
+        
+        """
+        tree: dict[str, dict] = {}
         for entry in self.all_textfields:
             if 'id' not in entry.innerData:
                 raise NotImplementedError()
@@ -108,10 +140,12 @@ class CreateItemUI(UI):
                 tree[_type] = {}
 
     
-    def __orderTextFields(self):
+    def __orderTextFields(self) -> dict:
+        """
+        orders the textfields based on the `_type` and returns as a dict
+        """
         ordered = {}
         for tf in self.all_textfields:
-            print(tf.label, tf.value, tf.innerData)
             _type, key = tf.innerData['id'].split(':')
             
             if _type == 'ESSENTIELL' or _type == 'ERNÄHRUNGSTABELLE':
@@ -123,18 +157,14 @@ class CreateItemUI(UI):
             else:
                 ordered[_type] = {}
                 ordered[_type][key] = tf.value if tf.value else None
-            
-        print(ordered)
         return ordered
     
     def createAndLeftPage(self):
+        """
+        sort the data, creates an item and switch/reset the page
+        """
         data = self.__orderTextFields()
         DAH.createItem(**data)
         self.items_ui.reset_list()
         self.page_switch()
-        
-        
-    def get(self):
-        return self.container
-          
-        
+    
