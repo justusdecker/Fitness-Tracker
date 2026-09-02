@@ -3,7 +3,16 @@ import flet as ft
 from src.databases.data_access import DAH, Item
 from src.databases.items import ItemColumns, NutrientSet
 from datetime import datetime, timezone
+
 class Items(UI):
+    """
+    Contains all of the needed functionality for building the UI for the *Item* Page.
+    
+    Does not contains Create Methods!
+    :param page_switch: The page the user will be redirected to. e.g. `CreateItemUI`
+    :param page: Used for opening Modales
+    
+    """
     def __init__(self, page, page_switch):
         super().__init__()
         self.textfields = []
@@ -56,9 +65,18 @@ class Items(UI):
         )
         
     def gen_new_textfields(self):
+        """
+        Remove old textfields and Create New Ones.
+        
+        !Textfields is a bit misleading, should be named: item_field or something
+        
+        """
         self.textfields.clear()
         def close_dialog(e, dlg):
-            
+            """
+            Closes the dialog that is given. `dlg`
+            Updates the page
+            """
             dlg.open = False
             e.page.update()
         for item in DAH.readItems():
