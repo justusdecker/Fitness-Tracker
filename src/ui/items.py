@@ -1,7 +1,7 @@
 from src.ui.ui import UI
 import flet as ft
-from src.databases.data_access import DAH, Item
-from src.databases.items import ItemColumns, NutrientSet
+from src.databases.body import EatenLog
+from src.databases.items import ItemColumns, NutrientSet, Item
 from datetime import datetime, timezone
 
 class Items(UI):
@@ -79,7 +79,7 @@ class Items(UI):
             """
             dlg.open = False
             e.page.update()
-        for item in DAH.readItems():
+        for item in Item.read():
             item: Item
             
             
@@ -142,7 +142,7 @@ class Items(UI):
             'timestamp': datetime.now(timezone.utc),
             'item': amount_textfield.innerData['item']
         }      
-        DAH.createEatenLogEntry(**data)
+        EatenLog.create(**data)
 
     def reset_list(self):
         """

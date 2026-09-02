@@ -158,7 +158,7 @@ class Item(Base):
         return value
 
     @staticmethod
-    def createItem(**data):
+    def create(**data):
         """
         Creates an Item in the ItemTable, add to Session & commit
         """
@@ -167,7 +167,7 @@ class Item(Base):
         session.commit()
     
     @staticmethod
-    def readItems() -> List["Item"]: 
+    def read() -> List["Item"]: 
         """
         Reads all Items of the ItemTable
         

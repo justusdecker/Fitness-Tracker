@@ -1,7 +1,4 @@
-from typing import List
 from src.databases.common.constants import *
-from src.databases.items import Item
-from src.databases.body import EatenLog
 from src.common.decorators import notImplementedYet
 
 class SQLAccess:

@@ -1,6 +1,5 @@
 from src.ui.ui import UI
-from src.databases.data_access import Item, DAH
-from src.databases.items import NutrientSet, ItemColumns
+from src.databases.items import NutrientSet, ItemColumns, Item
 import flet as ft
 from src.ui.common.tf_creator import getExpansionTileWColumn
 from src.common.decorators import notImplementedYet
@@ -170,7 +169,7 @@ class CreateItemUI(UI):
         sort the data, creates an item and switch/reset the page
         """
         data = self.__orderTextFields()
-        DAH.createItem(**data)
+        Item.create(**data)
         self.items_ui.reset_list()
         self.page_switch()
     

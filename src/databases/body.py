@@ -63,7 +63,7 @@ class EatenLog(Base):
     #! Missing validation
     
     @staticmethod
-    def createEatenLogEntry(**data):
+    def create(**data):
         """
         Creates an EatenLog in the EatenLogTable, add to Session & commit
         """
@@ -72,7 +72,7 @@ class EatenLog(Base):
         session.commit()
         
     @staticmethod
-    def readEatenLogs() -> List["EatenLog"]:
+    def read() -> List["EatenLog"]:
         """
         Reads all EatenLogs of the EatenLogTable
         

@@ -1,7 +1,7 @@
 from src.ui.ui import UI
 import flet as ft
 import flet_charts as fch
-from src.databases.data_access import DAH
+from src.databases.body import EatenLog
 
 from src.ui.common.tf_creator import getExpansionTileWColumn
 class BodyUI(UI):
@@ -54,7 +54,7 @@ class BodyUI(UI):
         """
         el = ft.ListView(
             controls=[
-                ft.Text(f'{el.timestamp}') for el in DAH.readEatenLogs()
+                ft.Text(f'{el.timestamp}') for el in EatenLog.read()
             ]
         )
         return el
