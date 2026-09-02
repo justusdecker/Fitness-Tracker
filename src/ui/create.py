@@ -18,6 +18,12 @@ def rsadc(text:str):
     return text.replace(' ','_').lower()
 
 class CreateItemUI(UI):
+    """
+    Contains all of the needed functionality for building the UI for the *Creating* Sub-Page
+    
+    :param items_ui: the pointer to the `Item` Class. For resetting
+    :param page_switch: The page the user will be redirected to. Usually `ItemUI`
+    """
     def __init__(self, page_switch, items_ui):
         super().__init__()
         self.items_ui = items_ui
