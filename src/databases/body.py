@@ -3,8 +3,8 @@ from datetime import datetime
 
 from sqlalchemy import Column, Integer, Float, DateTime, ForeignKey, String
 from sqlalchemy.orm import declarative_base, relationship
-
-
+from src.databases.data_access import session
+from typing import List, Self
 class ActivityLog(Base):
     """
     # ActivityLog
@@ -61,3 +61,21 @@ class EatenLog(Base):
     item = relationship("Item")
     
     #! Missing validation
+    
+    @staticmethod
+    def createEatenLogEntry(**data):
+        """
+        Creates an EatenLog in the EatenLogTable, add to Session & commit
+        """
+        obj = EatenLog(**data)
+        session.add(obj)
+        session.commit()
+        
+    @staticmethod
+    def readEatenLogs() -> List["EatenLog"]:
+        """
+        Reads all EatenLogs of the EatenLogTable
+        
+        :return: List[EatenLog]
+        """
+        return session.query(EatenLog).all()

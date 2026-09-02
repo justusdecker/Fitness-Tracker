@@ -2,6 +2,9 @@ from src.databases.common.constants import ( Base, Column, String, Integer, Nume
 from src.common.unit_convert import Mass
 from sqlalchemy.orm import validates
 from sqlalchemy import JSON
+from src.common.decorators import notImplementedYet
+from src.databases.data_access import session
+from typing import List, Self
 
 class NutrientSet:
     """
@@ -154,4 +157,40 @@ class Item(Base):
             
         return value
 
+    @staticmethod
+    def createItem(**data):
+        """
+        Creates an Item in the ItemTable, add to Session & commit
+        """
+        obj = Item(**data)
+        session.add(obj)
+        session.commit()
+    
+    @staticmethod
+    def readItems() -> List["Item"]: 
+        """
+        Reads all Items of the ItemTable
         
+        :return: List[Item]
+        """
+        return session.query(Item).all()
+    
+    @staticmethod
+    @notImplementedYet
+    def updateItem(id: int, **data): 
+        obj = Item.readItem(id)
+        for key in data:
+            if not hasattr(obj, key):
+                raise NameError(f'The attribute: [{key}] does not exist!')
+            setattr(
+                obj,
+                key,
+                data[key]
+            )
+    
+    @staticmethod
+    @notImplementedYet
+    def deleteItem(id: int): 
+        data = session.query(Item).all()[id] #! optimize
+        session.delete(data)
+        session.commit()
