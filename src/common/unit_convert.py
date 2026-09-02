@@ -1,5 +1,7 @@
 from src.common.valid_nutrient_validation import is_valid_nutrient_string
 from typing import Literal
+
+type Numeric = float | int
 import re
 MASS = (
     ('kg', 10**3),
@@ -11,11 +13,7 @@ MASS = (
 MASS_FACTORS = 'kg', 'g', 'mg', 'µg', 'ng'
 MASS_LIST = list(MASS_FACTORS) + ['auto']
 
-type MassResultType = Literal['kg'] | Literal['g'] | Literal['mg'] | Literal['µg'] | Literal['ng']
-class MassLike: 
-    weight: float = ...
-
-
+type MassResultType = Literal['kg', 'g', 'mg', 'µg', 'ng']
 
 class Mass:
     """
@@ -55,32 +53,45 @@ class Mass:
 
         self.weight = float(num_str) * MD[unit]
     
-    def calc(self, other: MassLike, _resType: MassResultType):
-        """
-        Returns the Sum of `self.weight` and `other.weight` in the wanted ResultType
-        
-        ResultTypes are defined in this file under `MASS_LIST` and `MASS_DICT`
-        """
-        if _resType not in MASS_FACTORS:
-            raise NameError(f'{_resType} does not exist in here')
-        if not isinstance(other, Mass):
-            raise TypeError('Incompatible Calc')
-        i = MASS_FACTORS.index(_resType)
-        if _resType == 'kg':
-            return f'{(self.weight + other.weight) * MASS[i][1]}kg'
-        else:
-            return f'{(self.weight + other.weight) / MASS[i][1]}{MASS[i][0]}'
-        
-        
+    def __calcCheckAndGetNewMass(self, obj: "Mass") -> "Mass":
+        if not isinstance(obj, (Mass, int, float)):
+            raise TypeError(f'[{obj}] is not of type Mass')
+        res = Mass.__new__(Mass)
+        res.has_traces = self.has_traces or (obj.has_traces if isinstance(obj, Mass) else False)
+        return res
+    
+    def __add__(self, other: "Mass | Numeric") -> "Mass":
+        res = self.__calcCheckAndGetNewMass(other)
+        res.weight = self.weight + (other.weight if isinstance(other, Mass) else other)
+        return res
+
+    def __sub__(self, other: "Mass | Numeric") -> "Mass":
+        res = self.__calcCheckAndGetNewMass(other)
+        res.weight = self.weight - (other.weight if isinstance(other, Mass) else other)
+        return res
+
+    def __mul__(self, other: "Mass | Numeric") -> "Mass":
+        res = self.__calcCheckAndGetNewMass(other)
+        res.weight = self.weight * (other.weight if isinstance(other, Mass) else other)
+        return res
+
+    def __truediv__(self, other: "Mass | Numeric") -> "Mass":
+        res = self.__calcCheckAndGetNewMass(other)
+        res.weight = self.weight / (other.weight if isinstance(other, Mass) else other)
+        return res
+    
+    def __str__(self):
+        return self.get('auto')
+  
     def get(self, _resType: str = 'auto') -> str:
         """
         Get the `self.weight` property in the ResultType you want.
         """
         if _resType not in MASS_LIST:
-            raise NameError(f'{_resType} does not exist in here')
+            raise KeyError(f'{_resType} does not exist in here')
         
         # 1. Base weight in grams (assuming self.weight is in grams)
-        base_g = self.weight  
+        base_g = self.weight
 
         # 2. Auto-select unit with best visibility
         if _resType == 'auto':
