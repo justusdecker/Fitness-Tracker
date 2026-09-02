@@ -39,12 +39,14 @@ class Mass:
         """
         MD = dict(MASS)
         
-        val_clean = str(val).strip().replace(',', '.')
+        self.has_traces = val.startswith(('<', '>')) # TODO: Give it a use. 
+        
+        val_clean = str(val).replace(',', '.').replace('<', '').replace('>', '').strip()
         
         match = re.match(r"^([+-]?\d*(?:\.\d+)?)\s*([a-zA-Zµ]+)$", val_clean)
         
         if not match:
-            raise ValueError(f"Invalid Format for Mass: '{val}'")
+            raise ValueError(f"Invalid Format for Mass: '{val}' : '{val_clean}' ")
             
         num_str, unit = match.groups()
         
@@ -65,9 +67,9 @@ class Mass:
             raise TypeError('Incompatible Calc')
         i = MASS_FACTORS.index(_resType)
         if _resType == 'kg':
-            return (self.weight + other.weight) * MASS[i][1]
+            return f'{(self.weight + other.weight) * MASS[i][1]}kg'
         else:
-            return (self.weight + other.weight) / MASS[i][1]
+            return f'{(self.weight + other.weight) / MASS[i][1]}{MASS[i][0]}'
         
         
     def get(self, _resType: str = 'auto') -> str:
