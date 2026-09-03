@@ -151,7 +151,7 @@ class Item(Base):
         """
         for k in value:
             if value[k] is None: continue
-            if value[k] not in NutrientSet.VITAMINE:
+            if k not in NutrientSet.VITAMINE:
                 raise ValueError(f'{value[k]} is not in VITAMINE')
             Mass(value[k])
             
