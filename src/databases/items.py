@@ -25,7 +25,7 @@ class NutrientSet:
     """
     SETNAMES = 'FETTSÄUREN_UND_ZUCKER', 'MINERALSTOFFE_SPURENELEMENTE', 'VITAMINE', 'AMINOSÄUREN', 'PERFORMANCE_SUPPLEMENTS'
     
-    FETTSÄUREN_UND_ZUCKER = 'einfach_ungesaettigte_fettsaeuren', 'mehrfach_ungesaettigte_fettsaeuren', 'omega_3', 'omega_6', 'trans_fettsaeuren', 'mehrwertige_alkohole'
+    FETTSÄUREN_UND_ZUCKER = 'einfach_ungesättigte_fettsäuren', 'mehrfach_ungesättigte_fettsäuren', 'omega_3', 'omega_6', 'trans_fettsäuren', 'mehrwertige_alkohole'
     
     MINERALSTOFFE_SPURENELEMENTE = 'kalium', 'kalzium', 'magnesium', 'eisen', 'zink',
     
@@ -151,8 +151,8 @@ class Item(Base):
         """
         for k in value:
             if value[k] is None: continue
-            if k not in NutrientSet.VITAMINE:
-                raise ValueError(f'{value[k]} is not in VITAMINE')
+            if k not in getattr(NutrientSet, key):
+                raise ValueError(f'{k} is not in VITAMINE')
             Mass(value[k])
             
         return value
@@ -189,8 +189,7 @@ class Item(Base):
             )
     
     @staticmethod
-    @notImplementedYet
-    def deleteItem(id: int): 
-        data = session.query(Item).all()[id] #! optimize
-        session.delete(data)
+    def delete(obj): 
+        
+        session.delete(obj)
         session.commit()
