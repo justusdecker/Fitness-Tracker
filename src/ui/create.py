@@ -3,18 +3,7 @@ from src.databases.items import NutrientSet, ItemColumns, Item
 import flet as ft
 from src.ui.common.tf_creator import getExpansionTileWColumn
 from src.common.decorators import notImplementedYet
-
-def rusaac(text: str):
-    """
-    Replace underscore -> space, and apply capitalize
-    """
-    return text.replace('_',' ').capitalize()
-
-def rsadc(text:str):
-    """
-    Converts rusaac strings back to database-compatible
-    """
-    return text.replace(' ','_').lower()
+from src.common.text_edit import rusaac, rsadc
 
 class CreateItemUI(UI):
     """
@@ -26,6 +15,7 @@ class CreateItemUI(UI):
     def __init__(self, page_switch, items_ui):
         super().__init__()
         self.items_ui = items_ui
+        
         self.page_switch = page_switch
         self.textfields: list[ft.TextField | ft.Button] = []
         
