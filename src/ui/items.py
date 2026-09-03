@@ -1,12 +1,22 @@
 from src.ui.ui import UI
 import flet as ft
-from src.databases.data_access import DAH, Item
-from src.databases.items import ItemColumns, NutrientSet
+from src.databases.body import EatenLog
+from src.databases.items import ItemColumns, NutrientSet, Item
+from datetime import datetime, timezone
+
 class Items(UI):
+    """
+    Contains all of the needed functionality for building the UI for the *Item* Page.
+    
+    Does not contains Create Methods!
+    :param page_switch: The page the user will be redirected to. e.g. `CreateItemUI`
+    :param page: Used for opening Modales
+    
+    """
     def __init__(self, page, page_switch):
         super().__init__()
         self.textfields = []
-        
+        self.body_ui = ...
         self.page = page
         self.gen_new_textfields()
         
@@ -55,12 +65,21 @@ class Items(UI):
         )
         
     def gen_new_textfields(self):
+        """
+        Remove old textfields and Create New Ones.
+        
+        !Textfields is a bit misleading, should be named: item_field or something
+        
+        """
         self.textfields.clear()
         def close_dialog(e, dlg):
-            
+            """
+            Closes the dialog that is given. `dlg`
+            Updates the page
+            """
             dlg.open = False
             e.page.update()
-        for item in DAH.readItems():
+        for item in Item.read():
             item: Item
             
             
@@ -85,15 +104,26 @@ class Items(UI):
                 icon=ft.Icons.INFO, 
                 on_click=lambda e, exp = exp: self.page.show_dialog(exp)) # ! Shows the wrong object because of the way lambda functions
             
-            ammi = ft.TextField(label='Amount', width=120)
-            enter = ft.Button(ft.Text('Enter'), width=120)
+            amount_textfield = ft.TextField(label='Amount', width=120)
+            amount_enter_button = ft.Button(ft.Text('Enter'), width=120)
+            
+            def eatenLogSubmitFC(e, amount_textfield = amount_textfield):
+                self.createEntry(amount_textfield)
+                self.body_ui.refreshEatenLogNutritionInfo()
+            amount_textfield.on_submit = eatenLogSubmitFC
+            amount_enter_button.on_click = eatenLogSubmitFC
+            
+            amount_textfield.innerData = {
+                'item': item,
+            }
+            
             obj = ft.Container(
                 ft.Column(
                     controls=[
                     ft.Row(
                         controls=[
                             ft.Column(controls=[exp_btn, img]),
-                            ft.Column(controls=[ammi, enter])],
+                            ft.Column(controls=[amount_textfield, amount_enter_button])],
                         ),
                     
                     ]
@@ -101,21 +131,52 @@ class Items(UI):
                 bgcolor=ft.Colors.WHITE_10
             )
             self.textfields.append(obj)
+    
+    def createEntry(self, amount_textfield):
+        """
+        Creates an Entry in the EatenLog Table
+         
+        TODO: Let the user decide what time it was! Currently it uses `datetime.now`.
+        TODO: Reset EatenLog Page
+        """
+        val = amount_textfield.value  
+        data = {
+            'amount': val,
+            'timestamp': datetime.now(timezone.utc),
+            'item': amount_textfield.innerData['item']
+        }      
+        EatenLog.create(**data)
+
     def reset_list(self):
-        # Alte Elemente entfernen
+        """
+        Clears the `list_view.controls` and refill them with new elements. Requests a UI-update for the list_view
+        In short term: refresh
+        """
         self.list_view.controls.clear()
         print(self.list_view.controls.__len__())
         self.gen_new_textfields()
-        # Neue Elemente hinzufügen
+        
         print(self.textfields.__len__())
         
         
         # UI aktualisieren
         self.list_view.update()
-    def getNutritionInfo(self, item) -> ft.DataTable:
+        
+    def getNutritionInfo(self, item: Item, MAX_CHARS = 40) -> ft.DataTable:
+        """
+        Generates a `ft.DataTable` and returns it.
+        In the DataTable we show the values of the given item. 
+        We show the amount of unset_keys & unset_sub_keys too.
+        
+        * Item item: The item that you want to show
+        * int MAX_CHARS = 40: The maximum length of the text shown in the right section
+        Steps:
+        * Collect Data
+        * Generate Flet DataTable for the Popup
+        """
         var_table = []
 
-        # 1. Daten einsammeln
+
         unset_keys = 0
         unset_sub_keys = 0
         for col in Item.__table__.columns:
@@ -132,7 +193,6 @@ class Items(UI):
                 for sub_key in getattr(NutrientSet, key):
                     sub_val = getattr(item, sub_key, None)
                     if sub_val is not None:
-                        # Falls es sich um ein Gewicht/Mass-Objekt handelt, get() nutzen
                         formatted_val = sub_val.get('auto') if hasattr(sub_val, 'get') else str(sub_val)
                         var_table.append((sub_key, formatted_val))
                     else:
@@ -140,12 +200,12 @@ class Items(UI):
             elif key in ItemColumns.ESSENTIELL or key in ItemColumns.ERNÄHRUNGSTABELLE:
                 
                 formatted_val = val.get('auto') if hasattr(val, 'get') else str(val)
-                if len(formatted_val) > 40:
-                    formatted_val = formatted_val[:40] + '...' # Cap the string at 40 char max + 3 for ellipsies
+                if len(formatted_val) > MAX_CHARS:
+                    formatted_val = formatted_val[:MAX_CHARS] + '...' # Cap the string at 40 char max + 3 for ellipsies
                 var_table.append((key, formatted_val))
         var_table.append(('Nicht gesetzt', str(unset_keys)))
         var_table.append(('Nicht gesetzt:s', str(unset_sub_keys)))
-        # 2. Flet DataTable für das Popup generieren
+
         return ft.DataTable(
             columns=[
                 ft.DataColumn(ft.Text("Nährstoff / Eigenschaft", weight=ft.FontWeight.BOLD)),
@@ -163,8 +223,3 @@ class Items(UI):
             heading_row_height=40,
             data_row_min_height=35,
         )
-    
-    def enable(self): ...
-    
-    def get(self):
-        return self.container

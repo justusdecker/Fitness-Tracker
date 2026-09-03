@@ -1,6 +1,10 @@
 import flet as ft
 
 def getExpansionTileWColumn(text: str, objects, subtitle = 'Placeholder') -> ft.Column:
+    """
+    Returns a `ft.Column` with an `ft.ExpansionTile` inside.
+    Used for `ft.ListView`.
+    """
     return ft.Column(
             spacing=0,
             controls=[

@@ -1,9 +1,14 @@
-from typing import List
 from src.databases.common.constants import *
-from src.databases.items import Item
+from src.common.decorators import notImplementedYet
+
 class SQLAccess:
     @staticmethod
-    def close_and_dispose(s=None,e=None):
+    @notImplementedYet
+    def close_and_dispose(s=Session,e=Engine):
+        """
+        Closes the connection to the Database.
+        For resetting, imports etc.
+        """
         if s is None:
             session.close()
         else:
@@ -15,42 +20,14 @@ class SQLAccess:
             
     @staticmethod
     def connect():
+        """
+        Creates a connection to the Database
+        
+        :return: The SessionMaker, Engine & Session
+        """
         engine = create_engine(DB_URL)
-        Base.metadata.create_all(engine)
         Session = sessionmaker(bind=engine)
         session = Session()
         return session, engine, Session
-
-class DAH:
-    """
-    Data Access Handler
-    """
-    def createItem(**data):
-        obj = Item(**data)
-        session.add(obj)
-        session.commit()
-    
-    
-    
-    def readItems() -> List[Item]: 
-        return session.query(Item).all()
-        
-    def updateItem(id: int, **data): 
-        obj = DAH.readItem(id)
-        for key in data:
-            if not hasattr(obj, key):
-                raise NameError(f'The attribute: [{key}] does not exist!')
-            setattr(
-                obj,
-                key,
-                data[key]
-            )
-            
-    def deleteItem(id: int): 
-        data = session.query(Item).all()[id] #! optimize
-        session.delete(data)
-        session.commit()
-    
-    
 
 session, engine, Session = SQLAccess.connect()

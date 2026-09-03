@@ -3,22 +3,37 @@ from datetime import datetime
 
 from sqlalchemy import Column, Integer, Float, DateTime, ForeignKey, String
 from sqlalchemy.orm import declarative_base, relationship
-
-
+from src.databases.data_access import session
+from typing import List, Self
+from datetime import datetime, timezone
 class ActivityLog(Base):
+    """
+    # ActivityLog
+    Used for tracking activitys of the User.
+    
+    :param id: `primary=True`
+    :param activity_type: The type like e.g.: Walk, Swim, Workout
+    :param duration_minutes: The duration of the activity in minutes
+    :param distance_km: Walked, Runned Distance in Kilometer, is `None` if not needed
+    :param steps: Walked, Runned Distance in Steps, is `None` if not needed
+    :param timestamp: The timestamp of the entry of type `DateTime`
+    
+    """
     __tablename__ = 'activity_log'
 
     id = Column(Integer, primary_key=True)
-    activity_type = Column(String, nullable=False)  # z. B. "Gehen", "Schwimmen", "Workout"
-    duration_minutes = Column(Integer, nullable=True) # z. B. 20 oder 120
-    distance_km = Column(Float, nullable=True)       # z. B. 10.0
-    steps = Column(Integer, nullable=True)           # z. B. 13250
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    activity_type = Column(String, nullable=False)  
+    duration_minutes = Column(Integer, nullable=True) 
+    distance_km = Column(Float, nullable=True) 
+    steps = Column(Integer, nullable=True)
+    timestamp = Column(DateTime, default=datetime.utcnow) #! UTCNOW is deprecated
     
 class BodyMetrics(Base):
     """
-    Fasst Gewicht und Körpergröße in einer Verlaufstabelle zusammen.
-    Datentypen als Float/DateTime ermöglichen spätere Auswertungen (z. B. BMI-Verlauf).
+    Combines all BodyMetrics at one centerpoint.
+    
+    !Currently no useful doc
+    
     """
     __tablename__ = 'body_metrics'
 
@@ -29,14 +44,66 @@ class BodyMetrics(Base):
 
 class EatenLog(Base):
     """
-    Protokolliert, wann welches Lebensmittel in welcher Menge gegessen wurde.
+    Keep a record of which food was eaten, when, and in what quantity.
+    
+    :param id: `primary=True`
+    :param amount: Amount in gramm, milligramm or pieces.
+    :param timestamp: The timestamp of the entry of type `DateTime`
+    :param item: The Link to the `Item` Table
+    :param item_id: The id of the item in the `Item` Table
     """
     __tablename__ = 'eaten_log'
 
     id = Column(Integer, primary_key=True)
-    amount_g = Column(Float, nullable=False)        # Menge in Gramm (z. B. 400.0 für Gratin)
+    amount = Column(String, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
-    # Verknüpfung zur bestehenden Ernährungs-Datenbank
-    food_id = Column(Integer, ForeignKey('food_items.id'), nullable=False)
-    food_item = relationship("FoodItem", back_populates="eaten_entries")
+    item_id = Column(Integer, ForeignKey('item.id'), nullable=False)
+    item = relationship("Item")
+    
+    #! Missing validation
+    
+    @staticmethod
+    def create(**data):
+        """
+        Creates an EatenLog in the EatenLogTable, add to Session & commit
+        """
+        obj = EatenLog(**data)
+        session.add(obj)
+        session.commit()
+        
+    @staticmethod
+    def readDateRange(start: datetime | None = None, end: datetime | None = None) -> List["EatenLog"]:
+        """
+        Reads EatenLogs that in the specified DateRange
+        
+        :return: List[EatenLog]
+        """
+        print(start, end)
+        if start is None:
+            start = datetime.now()
+    
+        if end is None:
+            end = start
+        start = start.astimezone()
+        end = end.astimezone()
+        start = start.replace(tzinfo=None).replace(hour=0, minute=0, second=0, microsecond=0)
+        end = end.replace(tzinfo=None).replace(hour=23, minute=59, second=59, microsecond=999999)
+        return session.query(EatenLog).filter(
+            EatenLog.timestamp.between(start, end)
+        )
+    
+    @staticmethod
+    def read() -> List["EatenLog"]:
+        """
+        Reads all EatenLogs of the EatenLogTable
+        
+        :return: List[EatenLog]
+        """
+        return session.query(EatenLog).all()
+    
+    @staticmethod
+    def delete(obj): 
+        session.delete(obj)
+        print(obj.timestamp)
+        session.commit()

@@ -1,5 +1,7 @@
 from src.common.valid_nutrient_validation import is_valid_nutrient_string
 from typing import Literal
+
+type Numeric = float | int
 import re
 MASS = (
     ('kg', 10**3),
@@ -9,52 +11,99 @@ MASS = (
     ('ng', 10**-9)
 )
 MASS_FACTORS = 'kg', 'g', 'mg', 'µg', 'ng'
+MASS_LIST = list(MASS_FACTORS) + ['auto']
 
-
-type MassResultType = Literal['kg'] | Literal['g'] | Literal['mg'] | Literal['µg'] | Literal['ng']
-class MassLike: 
-    weight: float = ...
-
-
+type MassResultType = Literal['kg', 'g', 'mg', 'µg', 'ng']
 
 class Mass:
+    """
+    This class is used to easy interact with masses like e.g.: **kg** and **g**
+    
+    Currently only Addition of two Mass-Classes is allowed
+    
+    You can get the Mass in you wanted Factory with `get()`
+    """
     def __init__(self, val: str):
-        if not is_valid_nutrient_string(val):
-            raise TypeError(f'{val} is not valid')
+        if not is_valid_nutrient_string(val, 'mass'):
+            raise TypeError(f'{val} is not valid, must be of type mass')
 
         self.__convert2GrammAndNumeric(val)
 
     def __convert2GrammAndNumeric(self, val: str):
-        MD = dict(MASS)
-        # 1. Leerzeichen entfernen und Strings wie "1.5 kg" oder "1,5kg" normieren
-        val_clean = str(val).strip().replace(',', '.')
+        """
+        Removes Spaces, Norms **,** to **.**, Calculates back to gramm and Set the `self.weight` property.
         
-        # 2. Per Regex Zahl und Einheit sauber trennen
+        The unit will not be stored!
+        """
+        MD = dict(MASS)
+        
+        self.has_traces = val.startswith(('<', '>')) # TODO: Give it a use. 
+        
+        val_clean = str(val).replace(',', '.').replace('<', '').replace('>', '').strip()
+        
         match = re.match(r"^([+-]?\d*(?:\.\d+)?)\s*([a-zA-Zµ]+)$", val_clean)
         
         if not match:
-            raise ValueError(f"Ungültiges Format für Gewichtsangabe: '{val}'")
+            raise ValueError(f"Invalid Format for Mass: '{val}' : '{val_clean}' ")
             
         num_str, unit = match.groups()
         
         if unit not in MD:
-            raise ValueError(f"Unbekannte Einheit '{unit}'. Erlaubt sind: {list(MD.keys())}")
-            
-        # 3. Umrechnung in Basis-Gramm (Zahl * Faktor)
+            raise ValueError(f"Unknown unit: '{unit}'. Allowed units: {list(MD.keys())}")
+
         self.weight = float(num_str) * MD[unit]
     
-    def calc(self, other: MassLike, _resType: MassResultType):
-        i = MASS_FACTORS.index(_resType)
-        print(i, MASS_FACTORS[i])
-        if _resType == 'kg':
-            return (self.weight + other.weight) * MASS[i][1]
-        else:
-            return (self.weight + other.weight) / MASS[i][1]
+    def __calcCheckAndGetNewMass(self, obj: "Mass") -> "Mass":
+        if not isinstance(obj, (Mass, int, float)):
+            raise TypeError(f'[{obj}] is not of type Mass')
+        res = Mass.__new__(Mass)
+        res.has_traces = self.has_traces or (obj.has_traces if isinstance(obj, Mass) else False)
+        return res
+    
+    def __add__(self, other: "Mass | Numeric") -> "Mass":
+        res = self.__calcCheckAndGetNewMass(other)
+        res.weight = self.weight + (other.weight if isinstance(other, Mass) else other)
+        return res
+
+    def __sub__(self, other: "Mass | Numeric") -> "Mass":
+        res = self.__calcCheckAndGetNewMass(other)
+        res.weight = self.weight - (other.weight if isinstance(other, Mass) else other)
+        return res
+
+    def __mul__(self, other: "Mass | Numeric") -> "Mass":
+        res = self.__calcCheckAndGetNewMass(other)
+        res.weight = self.weight * (other.weight if isinstance(other, Mass) else other)
+        return res
+
+    def __truediv__(self, other: "Mass | Numeric") -> "Mass":
+        res = self.__calcCheckAndGetNewMass(other)
+        res.weight = self.weight / (other.weight if isinstance(other, Mass) else other)
+        return res
+    
+    def __str__(self):
+        return self.get('auto')
+    
+    def asFactor(self) -> Numeric:
+        """
+        In case you want to calculate a factor:
         
+        ```python
+        c = Mass(a) / Mass(b)
         
+        c.asFactor() # contains the factor
+        ```
+        """
+        return self.weight
+    
     def get(self, _resType: str = 'auto') -> str:
+        """
+        Get the `self.weight` property in the ResultType you want.
+        """
+        if _resType not in MASS_LIST:
+            raise KeyError(f'{_resType} does not exist in here')
+        
         # 1. Base weight in grams (assuming self.weight is in grams)
-        base_g = self.weight  
+        base_g = self.weight
 
         # 2. Auto-select unit with best visibility
         if _resType == 'auto':
@@ -72,10 +121,3 @@ class Mass:
         # 4. Format cleanly (removes trailing .0 for whole numbers)
         formatted_weight = f"{weight:.3f}".rstrip('0').rstrip('.') if isinstance(weight, float) else weight
         return f"{formatted_weight}{_resType}"
-
-
-a = Mass('10kg')
-b = Mass('2000g')
-c = Mass('200000mg')
-print(a.get('ng'), b.get('mg'), a.get(), b.get(), c.get())
-print(a.calc(b, 'mg'))

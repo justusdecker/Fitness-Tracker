@@ -1,7 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Numeric, Boolean
+from sqlalchemy import Column, Integer, String, Numeric, Boolean, Engine
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 # from sqlalchemy.sql import text
 
 DB_PATH = f'./data.db'

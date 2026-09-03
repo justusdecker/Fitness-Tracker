@@ -1,6 +1,9 @@
 from src.ui.ui import UI
 import flet as ft
 class Settings(UI):
+    """
+    !NotImplementedYet
+    """
     def __init__(self):
         super().__init__()
         self.textfields = []
@@ -10,6 +13,3 @@ class Settings(UI):
             border_radius=ft.BorderRadius.all(5),
             expand=True
         )
-
-    def get(self):
-        return self.container
