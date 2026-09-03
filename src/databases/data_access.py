@@ -26,7 +26,6 @@ class SQLAccess:
         :return: The SessionMaker, Engine & Session
         """
         engine = create_engine(DB_URL)
-        Base.metadata.create_all(engine)
         Session = sessionmaker(bind=engine)
         session = Session()
         return session, engine, Session
