@@ -1,0 +1,24 @@
+titel: "Iso Light Sport"
+beschreibung: ""
+zutaten: ""
+vorschaubild: "https://d2y99t05v0nd2u.cloudfront.net/products/images2/4504051415_8722200963511_01.jpg.jpg"
+barcode: "8722200963511"
+marke: "united softdrinks"
+serviermenge: "100g"
+gewicht: "500g"
+allergene: ""
+nova_gruppe: ""
+nutri_score: ""
+
+# Nährwerte (Haupt-Makros) - Werte IMMER mit Einheit angebend (z.B. 370kcal, 7g)
+kalorien: "18g"
+fett: "0g"
+davon_gesättigte_fettsäuren: "0g"
+kohlenhydrate: "4,5g"
+ballaststoffe: "0g"
+zucker: "4,3g"
+protein: "0g"
+salz: "0.02g"
+
+VITAMINE:
+    B6: "0,21mg"

@@ -1,0 +1,24 @@
+titel: "Isotonic"
+beschreibung: "tropical blue flavour"
+zutaten: ""
+vorschaubild: "https://www.kaloricketabulky.cz/file/image/foodstuff/0d993a9a802941bd8dc4dd5b56291360/26493e601d62476f9a7113d21d8c3356"
+barcode: "4335619175907"
+marke: "Freeway"
+serviermenge: "100g"
+gewicht: "500g"
+allergene: ""
+nova_gruppe: ""
+nutri_score: "D"
+
+# Nährwerte (Haupt-Makros) - Werte IMMER mit Einheit angebend (z.B. 370kcal, 7g)
+kalorien: "19g"
+fett: "0g"
+davon_gesättigte_fettsäuren: "0g"
+kohlenhydrate: "4,5g"
+ballaststoffe: "0g"
+zucker: "4,2g"
+protein: "0g"
+salz: "0.13g"
+
+VITAMINE:
+    B6: "0,11mg"
