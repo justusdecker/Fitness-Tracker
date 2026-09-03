@@ -82,7 +82,19 @@ class Mass:
     
     def __str__(self):
         return self.get('auto')
-  
+    
+    def asFactor(self) -> Numeric:
+        """
+        In case you want to calculate a factor:
+        
+        ```python
+        c = Mass(a) / Mass(b)
+        
+        c.asFactor() # contains the factor
+        ```
+        """
+        return self.weight
+    
     def get(self, _resType: str = 'auto') -> str:
         """
         Get the `self.weight` property in the ResultType you want.
