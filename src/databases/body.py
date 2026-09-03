@@ -5,6 +5,7 @@ from sqlalchemy import Column, Integer, Float, DateTime, ForeignKey, String
 from sqlalchemy.orm import declarative_base, relationship
 from src.databases.data_access import session
 from typing import List, Self
+from datetime import datetime, timezone
 class ActivityLog(Base):
     """
     # ActivityLog
@@ -71,6 +72,27 @@ class EatenLog(Base):
         session.add(obj)
         session.commit()
         
+    @staticmethod
+    def readDateRange(start: datetime | None = None, end: datetime | None = None) -> List["EatenLog"]:
+        """
+        Reads EatenLogs that in the specified DateRange
+        
+        :return: List[EatenLog]
+        """
+        print(start, end)
+        if start is None:
+            start = datetime.now()
+    
+        if end is None:
+            end = start
+        start = start.astimezone()
+        end = end.astimezone()
+        start = start.replace(tzinfo=None).replace(hour=0, minute=0, second=0, microsecond=0)
+        end = end.replace(tzinfo=None).replace(hour=23, minute=59, second=59, microsecond=999999)
+        return session.query(EatenLog).filter(
+            EatenLog.timestamp.between(start, end)
+        )
+    
     @staticmethod
     def read() -> List["EatenLog"]:
         """
