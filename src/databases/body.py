@@ -101,3 +101,9 @@ class EatenLog(Base):
         :return: List[EatenLog]
         """
         return session.query(EatenLog).all()
+    
+    @staticmethod
+    def delete(obj): 
+        session.delete(obj)
+        print(obj.timestamp)
+        session.commit()
