@@ -8,6 +8,13 @@ from src.ui.common.tf_creator import getExpansionTileWColumn
 from datetime import datetime, timezone
 from src.common.text_edit import rusaac, rsadc
 
+
+def increase_or_add(dictionary: dict, key: str, value: float | int):
+    if key in dictionary:
+        dictionary[key] += value
+    else:
+        dictionary[key] = value
+
 class BodyUI(UI):
     """
     Contains all of the needed functionality for building the UI for the *Body* Page
@@ -57,19 +64,128 @@ class BodyUI(UI):
             border_radius=ft.BorderRadius.all(5),
             expand=True
         )
-        
+    
+    def __getServingAmountAndEatenLogAmount(self, item: Item, eaten_log: EatenLog) -> tuple[Mass, Mass]:
+        if item.serviermenge is None or item.serviermenge == '':
+            serving_amount = Mass('100g')
+        else:
+            serving_amount = Mass(item.serviermenge)
+
+        if eaten_log.amount is None or eaten_log.amount == '':
+            amount = Mass('200g')
+        else:    
+            amount = Mass(eaten_log.amount)
+        return serving_amount, amount
+    
+    def __getDataTableNutritionValue(self, data: list[tuple[ft.DataCell, ft.DataCell]]) -> ft.DataTable:
+        return ft.DataTable(
+            columns=[
+                ft.DataColumn(ft.Text("Nährstoff / Eigenschaft", weight=ft.FontWeight.BOLD)),
+                ft.DataColumn(ft.Text("Wert", weight=ft.FontWeight.BOLD), numeric=True),
+            ],
+            rows=[
+                ft.DataRow(
+                    cells=[
+                        l,
+                        r,
+                    ]
+                )
+                for l, r in data
+            ],
+            heading_row_height=40,
+            data_row_min_height=35,
+        )  
+          
+    def __getDataTableSummary(self, eaten_summary: dict[str, str]) -> ft.DataTable:
+        return ft.DataTable(
+        columns=[
+            ft.DataColumn(ft.Text("Nährstoff / Eigenschaft", weight=ft.FontWeight.BOLD)),
+            ft.DataColumn(ft.Text("Wert", weight=ft.FontWeight.BOLD), numeric=True),
+        ],
+        rows=[
+            ft.DataRow(
+                cells=[
+                    ft.DataCell(ft.Text(f'{k}')),
+                    ft.DataCell(ft.Text(f'{eaten_summary[k]}')),
+                ]
+            )
+            for k in eaten_summary
+        ],
+        heading_row_height=40,
+        data_row_min_height=35,
+    )  
+    
+    def __iterateColumns(self,
+                         item: Item,
+                         eaten_summary: dict[str, str],
+                         eaten_log_current: list,
+                         generated_factor: float):
+        for c in Item.__table__.columns:
+            name: str = c.name
+            if name in NutrientSet.SETNAMES:
+                nutrient_set = getattr(item, name)
+                self.__iterateNutrientSet(
+                    name,
+                    nutrient_set,
+                    eaten_summary,
+                    eaten_log_current,
+                    generated_factor
+                )
+
+            elif name in ItemColumns.ERNÄHRUNGSTABELLE:
+                val = getattr(item, name)
+                if val is not None and val != '':
+                    mass = Mass(val)    
+                    cell_l = ft.DataCell(ft.Text(rusaac(name)))
+                    cr_row = ft.Row(
+                        [
+                        ft.Text(f'{mass}'),
+                        ft.Text(f'({mass * generated_factor})', weight=ft.FontWeight.BOLD, italic=True, color=ft.Colors.DEEP_PURPLE)
+                    ]
+                    )
+                    cell_r = ft.DataCell(cr_row)
+                    eaten_log_current.append((cell_l, cell_r))
+                    increase_or_add(eaten_summary, name, Mass(val) * generated_factor)
+       
+    def __iterateNutrientSet(self,
+                             name: str,
+                             nutrient_set: dict[str, str],
+                             eaten_summary: dict,
+                             eaten_log_current: list[tuple[ft.DataCell, ft.DataCell]],
+                             generated_factor: float):
+        for key_of_nutrient_set in getattr(NutrientSet, name):
+            if nutrient_set is None or key_of_nutrient_set not in nutrient_set or nutrient_set[key_of_nutrient_set] is None:
+                continue
+            
+            mass = Mass(nutrient_set[key_of_nutrient_set])
+            
+            cell_l = ft.DataCell(ft.Text(f'{rusaac(name)} - {key_of_nutrient_set}'))
+            cell_r = ft.DataCell(
+                        ft.Row(
+                                    [
+                                    ft.Text(f'{mass}'),
+                                    ft.Text(f'({mass * generated_factor})', weight=ft.FontWeight.BOLD, italic=True, color=ft.Colors.DEEP_PURPLE)]
+                                        ))
+            
+            eaten_log_current.append((cell_l, cell_r))
+            
+            increase_or_add(eaten_summary, key_of_nutrient_set, Mass(nutrient_set[key_of_nutrient_set]) * generated_factor)
+    
     def refreshEatenLogNutritionInfo(self, start = None):
         """
-        Alle Daten müssen mit dem zugenommen faktor multipliziert werden
-        
-        Wichtige Daten:
-        * Kalorien
-        * Menge
-        * mehr erst beim öffnen vom Tile
+        Refreshes the EatenLog UI components and recalculates nutritional totals.
+
+        Fetches log entries for the specified date, calculates portion scaling factors,
+        and renders interactive expansion tiles for each item alongside a total summary table.
+
+        :param start: The start date used to filter log entries. If provided, the time is
+                    normalized to cover the full day (00:00:00 to 23:59:59). If None, only the today
+                    recorded entries are retrieved.
+        :type start: datetime | None
         """
 
         self.el.controls.clear()
-        all_objects = []
+        eaten_log_to_extend_by = []
         picker = ft.DatePicker()
         
         picker_btn = ft.Button(
@@ -78,9 +194,7 @@ class BodyUI(UI):
             on_click=lambda _: self.page.show_dialog(picker),
         )
         
-        # 1. Datum aus Picker bereinigen (Zeitzonen entfernen, Tag isolieren)
         if start is not None:
-            # Nimm exakt das ausgewählte Kalenderdatum ohne UTC-Offset
             d = start.date()
             start = datetime(d.year, d.month, d.day, 0, 0, 0)
             end = datetime(d.year, d.month, d.day, 23, 59, 59, 999999)
@@ -90,33 +204,24 @@ class BodyUI(UI):
         
         def on_date_change(e):
             if picker.value:
-                # Reiche das reine Datum weiter
                 self.refreshEatenLogNutritionInfo(start=picker.value.astimezone().replace(tzinfo=None))
                 self.el.update()
 
         picker.on_change = on_date_change
         
-        all_objects.append(picker_btn)
+        eaten_log_to_extend_by.append(picker_btn)
         eaten_summary = {}
         for eaten_log in EatenLog.readDateRange(start, end): # TODO: Add Date Input
             eaten_log: EatenLog
             
             item: Item = eaten_log.item
-            if item.serviermenge is None or item.serviermenge == '':
-                serving_amount = Mass('100g')
-            else:
-                serving_amount = Mass(item.serviermenge)
- 
-            if eaten_log.amount is None or eaten_log.amount == '':
-                amount = Mass('200g')
-            else:    
-                amount = Mass(eaten_log.amount)
-            
+        
+            serving_amount, amount = self.__getServingAmountAndEatenLogAmount(item, eaten_log)
             
             factor = amount / serving_amount
             generated_factor = factor.asFactor() # We need this to calculate the nutrients
             
-            objects = []
+            eaten_log_current = []
             
             def deleteEatenLog(e, el = eaten_log):
 
@@ -124,6 +229,7 @@ class BodyUI(UI):
                 self.refreshEatenLogNutritionInfo()
             
             delete_button = ft.FilledIconButton(ft.Icons.DELETE, on_click=deleteEatenLog)
+            
             if item.vorschaubild:
                 img = ft.Image(
                         src=item.vorschaubild if item.vorschaubild else "",
@@ -142,105 +248,29 @@ class BodyUI(UI):
             ]
             )
             cell_r = ft.DataCell(cr_row)
-            objects.append((cell_l, cell_r))
+            eaten_log_current.append((cell_l, cell_r))
             
-            for c in Item.__table__.columns:
-                if c.name in NutrientSet.SETNAMES:
-                    for s in getattr(NutrientSet, c.name):
-                        ns = getattr(item, c.name)
-                        if ns is None: continue
-                        if s not in ns: continue
-                        if ns[s] is None: continue
-                        mass = Mass(ns[s])
+            self.__iterateColumns(item,
+                                  eaten_summary,
+                                  eaten_log_current,
+                                  generated_factor)
                         
-                        cell_l = ft.DataCell(ft.Text(f'{rusaac(c.name)} - {s}'))
-                        cr_row = ft.Row(
-                            [
-                            ft.Text(f'{mass}'),
-                            ft.Text(f'({mass * generated_factor})', weight=ft.FontWeight.BOLD, italic=True, color=ft.Colors.DEEP_PURPLE)
-                        ]
-                        )
-                        cell_r = ft.DataCell(cr_row)
-                        objects.append((cell_l, cell_r))
-                        
-                        if s in eaten_summary:
-                            eaten_summary[s] += Mass(ns[s]) * generated_factor
-                        else:
-                            eaten_summary[s] = Mass(ns[s]) * generated_factor
-                        
-                        
-                elif c.name in ItemColumns.ERNÄHRUNGSTABELLE:
-                    val = getattr(item, c.name)
-                    if val is None or val == '':
-                        ...
-                    else:
-                        mass = Mass(val)    
-                        cell_l = ft.DataCell(ft.Text(rusaac(c.name)))
-                        cr_row = ft.Row(
-                            [
-                            ft.Text(f'{mass}'),
-                            ft.Text(f'({mass * generated_factor})', weight=ft.FontWeight.BOLD, italic=True, color=ft.Colors.DEEP_PURPLE)
-                        ]
-                        )
-                        cell_r = ft.DataCell(cr_row)
-                        objects.append((cell_l, cell_r))
-                        if c.name in eaten_summary:
-                            eaten_summary[c.name] += Mass(val) * generated_factor
-                        else:
-                            eaten_summary[c.name] = Mass(val) * generated_factor
-                        
-                        
-            DATATABLE = ft.DataTable(
-            columns=[
-                ft.DataColumn(ft.Text("Nährstoff / Eigenschaft", weight=ft.FontWeight.BOLD)),
-                ft.DataColumn(ft.Text("Wert", weight=ft.FontWeight.BOLD), numeric=True),
-            ],
-            rows=[
-                ft.DataRow(
-                    cells=[
-                        l,
-                        r,
-                    ]
-                )
-                for l, r in objects
-            ],
-            heading_row_height=40,
-            data_row_min_height=35,
-        )      
+            DATATABLE = self.__getDataTableNutritionValue(eaten_log_current)
             
-         
-            
-            timestamp = eaten_log.timestamp
             gETC_vars = [img, delete_button, DATATABLE] if item.vorschaubild else [delete_button, DATATABLE]
-            obj = getExpansionTileWColumn(item.titel, gETC_vars, f'{timestamp}')
-            key=f"eaten_log_entry_{eaten_log.id}"
-            obj.key = key
-            all_objects.append(
-                obj
-            )
-        
-        SUMMARY = ft.DataTable(
-        columns=[
-            ft.DataColumn(ft.Text("Nährstoff / Eigenschaft", weight=ft.FontWeight.BOLD)),
-            ft.DataColumn(ft.Text("Wert", weight=ft.FontWeight.BOLD), numeric=True),
-        ],
-        rows=[
-            ft.DataRow(
-                cells=[
-                    ft.DataCell(ft.Text(f'{k}')),
-                    ft.DataCell(ft.Text(f'{eaten_summary[k]}')),
-                ]
-            )
-            for k in eaten_summary
-        ],
-        heading_row_height=40,
-        data_row_min_height=35,
-    )   
-        all_objects.insert(0, SUMMARY)
-        all_objects.append(ft.Text('Keine weiteren Einträge gefunden'))
             
-        print(len(all_objects))
-        self.el.controls.extend(all_objects)
+            entry_expansion_tile_column = getExpansionTileWColumn(item.titel, gETC_vars, f'{eaten_log.timestamp}')
+
+            entry_expansion_tile_column.key = f"eaten_log_entry_{eaten_log.id}"
+            
+            eaten_log_to_extend_by.append(entry_expansion_tile_column)
+        
+        SUMMARY = self.__getDataTableSummary(eaten_summary)
+        
+        eaten_log_to_extend_by.insert(0, SUMMARY)
+        eaten_log_to_extend_by.append(ft.Text('Keine weiteren Einträge gefunden'))
+
+        self.el.controls.extend(eaten_log_to_extend_by)
         try:
             self.el.update()
         except: ...
