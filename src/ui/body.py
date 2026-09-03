@@ -60,12 +60,10 @@ class BodyUI(UI):
         
     def refreshEatenLogNutritionInfo(self, start = None):
         """
-        Alle Daten müssen mit dem zugenommen faktor multipliziert werden
+        Refreshes the EatenLog-Page
         
-        Wichtige Daten:
-        * Kalorien
-        * Menge
-        * mehr erst beim öffnen vom Tile
+        :param start: The datetime.day you want to check.
+        :type start: None | datetime 
         """
 
         self.el.controls.clear()
