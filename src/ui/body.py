@@ -173,10 +173,15 @@ class BodyUI(UI):
     
     def refreshEatenLogNutritionInfo(self, start = None):
         """
-        Refreshes the EatenLog-Page
-        
-        :param start: The datetime.day you want to check.
-        :type start: None | datetime 
+        Refreshes the EatenLog UI components and recalculates nutritional totals.
+
+        Fetches log entries for the specified date, calculates portion scaling factors,
+        and renders interactive expansion tiles for each item alongside a total summary table.
+
+        :param start: The start date used to filter log entries. If provided, the time is
+                    normalized to cover the full day (00:00:00 to 23:59:59). If None, only the today
+                    recorded entries are retrieved.
+        :type start: datetime | None
         """
 
         self.el.controls.clear()
