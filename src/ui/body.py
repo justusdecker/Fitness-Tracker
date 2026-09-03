@@ -31,10 +31,8 @@ class BodyUI(UI):
                       *all_charts]
         )
         
-        self.eaten_log_objects = []
-        
         self.el = ft.ListView(
-            controls=self.eaten_log_objects
+            controls=[]
         )
         
         self.refreshEatenLogNutritionInfo()
@@ -69,7 +67,8 @@ class BodyUI(UI):
         * Menge
         * mehr erst beim öffnen vom Tile
         """
-        print(f'refresh {start}')
+
+        self.el.controls.clear()
         all_objects = []
         picker = ft.DatePicker()
         
@@ -78,7 +77,6 @@ class BodyUI(UI):
             icon=ft.Icons.CALENDAR_MONTH,
             on_click=lambda _: self.page.show_dialog(picker),
         )
-        
         
         # 1. Datum aus Picker bereinigen (Zeitzonen entfernen, Tag isolieren)
         if start is not None:
@@ -94,11 +92,12 @@ class BodyUI(UI):
             if picker.value:
                 # Reiche das reine Datum weiter
                 self.refreshEatenLogNutritionInfo(start=picker.value.astimezone().replace(tzinfo=None))
+                self.el.update()
 
         picker.on_change = on_date_change
         
         all_objects.append(picker_btn)
-        
+        eaten_summary = {}
         for eaten_log in EatenLog.readDateRange(start, end): # TODO: Add Date Input
             eaten_log: EatenLog
             
@@ -119,6 +118,21 @@ class BodyUI(UI):
             
             objects = []
             
+            def deleteEatenLog(e, el = eaten_log):
+
+                EatenLog.delete(el)
+                self.refreshEatenLogNutritionInfo()
+            
+            delete_button = ft.FilledIconButton(ft.Icons.DELETE, on_click=deleteEatenLog)
+            if item.vorschaubild:
+                img = ft.Image(
+                        src=item.vorschaubild if item.vorschaubild else "",
+                        width=200,
+                        height=150,
+                        fit="cover",
+                        border_radius=ft.BorderRadius.all(8),
+                    )
+                           
             cell_l = ft.DataCell(ft.Text(f'Menge'))
             cr_row = ft.Row(
                 [
@@ -149,6 +163,12 @@ class BodyUI(UI):
                         cell_r = ft.DataCell(cr_row)
                         objects.append((cell_l, cell_r))
                         
+                        if s in eaten_summary:
+                            eaten_summary[s] += Mass(ns[s]) * generated_factor
+                        else:
+                            eaten_summary[s] = Mass(ns[s]) * generated_factor
+                        
+                        
                 elif c.name in ItemColumns.ERNÄHRUNGSTABELLE:
                     val = getattr(item, c.name)
                     if val is None or val == '':
@@ -164,6 +184,10 @@ class BodyUI(UI):
                         )
                         cell_r = ft.DataCell(cr_row)
                         objects.append((cell_l, cell_r))
+                        if c.name in eaten_summary:
+                            eaten_summary[c.name] += Mass(val) * generated_factor
+                        else:
+                            eaten_summary[c.name] = Mass(val) * generated_factor
                         
                         
             DATATABLE = ft.DataTable(
@@ -184,19 +208,42 @@ class BodyUI(UI):
             data_row_min_height=35,
         )      
             
+         
+            
             timestamp = eaten_log.timestamp
+            gETC_vars = [img, delete_button, DATATABLE] if item.vorschaubild else [delete_button, DATATABLE]
+            obj = getExpansionTileWColumn(item.titel, gETC_vars, f'{timestamp}')
+            key=f"eaten_log_entry_{eaten_log.id}"
+            obj.key = key
             all_objects.append(
-                getExpansionTileWColumn('Daten', [DATATABLE], f'{timestamp}')
+                obj
             )
-        else:
-            all_objects.append(ft.Text('Keine Einträge gefunden'))
-            
-            
         
+        SUMMARY = ft.DataTable(
+        columns=[
+            ft.DataColumn(ft.Text("Nährstoff / Eigenschaft", weight=ft.FontWeight.BOLD)),
+            ft.DataColumn(ft.Text("Wert", weight=ft.FontWeight.BOLD), numeric=True),
+        ],
+        rows=[
+            ft.DataRow(
+                cells=[
+                    ft.DataCell(ft.Text(f'{k}')),
+                    ft.DataCell(ft.Text(f'{eaten_summary[k]}')),
+                ]
+            )
+            for k in eaten_summary
+        ],
+        heading_row_height=40,
+        data_row_min_height=35,
+    )   
+        all_objects.insert(0, SUMMARY)
+        all_objects.append(ft.Text('Keine weiteren Einträge gefunden'))
             
-        self.eaten_log_objects.clear()
-        self.eaten_log_objects.extend(all_objects)
-            
+        print(len(all_objects))
+        self.el.controls.extend(all_objects)
+        try:
+            self.el.update()
+        except: ...
         self.page.update()
 
     def getTabs(self, lv, el, bm, a) -> ft.Tabs:
