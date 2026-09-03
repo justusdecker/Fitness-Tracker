@@ -16,7 +16,7 @@ class Items(UI):
     def __init__(self, page, page_switch):
         super().__init__()
         self.textfields = []
-        
+        self.body_ui = ...
         self.page = page
         self.gen_new_textfields()
         
@@ -106,9 +106,12 @@ class Items(UI):
             
             amount_textfield = ft.TextField(label='Amount', width=120)
             amount_enter_button = ft.Button(ft.Text('Enter'), width=120)
-            eatenlog_sumit_function = lambda e, amount_textfield = amount_textfield: self.createEntry(amount_textfield)
-            amount_textfield.on_submit = eatenlog_sumit_function
-            amount_enter_button.on_click = eatenlog_sumit_function
+            
+            def eatenLogSubmitFC(e, amount_textfield = amount_textfield):
+                self.createEntry(amount_textfield)
+                self.body_ui.refreshEatenLogNutritionInfo()
+            amount_textfield.on_submit = eatenLogSubmitFC
+            amount_enter_button.on_click = eatenLogSubmitFC
             
             amount_textfield.innerData = {
                 'item': item,
