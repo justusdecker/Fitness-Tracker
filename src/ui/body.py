@@ -38,17 +38,12 @@ class BodyUI(UI):
                       *all_charts]
         )
         
-        self.el = ft.ListView(
-            controls=[]
-        )
+        self.eaten_log_list_view = ft.ListView(controls=[])
+        self.body_size_list_view = ft.ListView(controls=[])
         
         self.refreshEatenLogNutritionInfo()
+        self.refreshAddBodySizeSubPage()
         
-        bm = ft.ListView(
-            controls=[
-                ft.Text(f'bm_{i}') for i in range(12)
-            ]
-        )
         
         a = ft.ListView(
             controls=[
@@ -56,7 +51,7 @@ class BodyUI(UI):
             ]
         )
         
-        result = self.getTabs(lv, self.el, bm, a)
+        result = self.getTabs(lv, self.eaten_log_list_view, self.body_size_list_view, a)
         
         self.container = ft.Container(
             content=result,
@@ -64,6 +59,27 @@ class BodyUI(UI):
             border_radius=ft.BorderRadius.all(5),
             expand=True
         )
+    
+    def refreshAddBodySizeSubPage(self):
+        self.body_size_list_view.controls.clear()
+        body_mass_to_extend_by = []
+        
+        picker = ft.DatePicker()
+        
+        picker_btn = ft.Button(
+            "Pick date",
+            icon=ft.Icons.CALENDAR_MONTH,
+            on_click=lambda _: self.page.show_dialog(picker),
+        )
+        
+        def on_date_change(e):
+            picker.value
+        
+        picker.on_change = on_date_change
+        
+        VALUES_TO_INSERT = {
+            ''
+        }
     
     def __getServingAmountAndEatenLogAmount(self, item: Item, eaten_log: EatenLog) -> tuple[Mass, Mass]:
         if item.serviermenge is None or item.serviermenge == '':
@@ -184,7 +200,7 @@ class BodyUI(UI):
         :type start: datetime | None
         """
 
-        self.el.controls.clear()
+        self.eaten_log_list_view.controls.clear()
         eaten_log_to_extend_by = []
         picker = ft.DatePicker()
         
@@ -205,7 +221,7 @@ class BodyUI(UI):
         def on_date_change(e):
             if picker.value:
                 self.refreshEatenLogNutritionInfo(start=picker.value.astimezone().replace(tzinfo=None))
-                self.el.update()
+                self.eaten_log_list_view.update()
 
         picker.on_change = on_date_change
         
@@ -270,9 +286,9 @@ class BodyUI(UI):
         eaten_log_to_extend_by.insert(0, SUMMARY)
         eaten_log_to_extend_by.append(ft.Text('Keine weiteren Einträge gefunden'))
 
-        self.el.controls.extend(eaten_log_to_extend_by)
+        self.eaten_log_list_view.controls.extend(eaten_log_to_extend_by)
         try:
-            self.el.update()
+            self.eaten_log_list_view.update()
         except: ...
         self.page.update()
 
